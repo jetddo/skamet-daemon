@@ -22,9 +22,9 @@ import ucar.nc2.dataset.NetcdfDataset;
 /**
  * Created by chlee on 2017-02-15.
  */
-public class GKTG_DataProcess extends DataProcessor
+public class RKIM_SIGWX_DataProcess extends DataProcessor
 {
-    private static final String DATAFILE_PREFIX = "gktg";
+    private static final String DATAFILE_PREFIX = "rkim_sigwx";
     private static final int DB_COLUMN_COUNT = 2;
     private static final int FILE_DATE_INDEX_POS = 2; // 20170101/visibility.nc
     private static final int[] DB_PRIMARY_KEY_INDEXES = { 0 }; // COL
@@ -32,41 +32,9 @@ public class GKTG_DataProcess extends DataProcessor
     private final int INSERT_QUERY_2 = 2;
     private final int DELETE_QUERY = 3;
 
-    public GKTG_DataProcess(DaemonSettings settings)
+    public RKIM_SIGWX_DataProcess(DaemonSettings settings)
     {
         super(settings, DATAFILE_PREFIX);
-    }
-    
-    private void generateGktgImageFiles(File gktgFile, DatabaseManager dbManager, ProcessorInfo processorInfo, String attrName, String varName) {
-        
-    	String gktgImgSavePath = processorInfo.FileSavePath.replaceAll("/GKTG/", "/GKTG_IMG/");
-    			
-        File saveFolder = new File(gktgImgSavePath);
-      
-        if (!saveFolder.exists() || saveFolder.isFile())
-        {
-            saveFolder.mkdirs();
-        }
-        
-        GktgImageGenerator gktgImageGenerator = new GktgImageGenerator(dbManager, processorInfo, attrName, varName);
-        
-        try {
-        	
-        	NetcdfDataset ncFile = NetcdfDataset.acquireDataset(gktgFile.getAbsolutePath(), null);
-            
-            List<BoundLonLat> jsonList = gktgImageGenerator.generateImages(ncFile, gktgFile.getName(), gktgImgSavePath); 
-
-            ncFile.close();
-            
-            File file = new File(gktgImgSavePath + File.separator + gktgFile.getName() + ".json");
-
-            FileWriter fw = new FileWriter(file);
-            fw.write(new Gson().toJson(jsonList));
-            fw.close();
-            
-        } catch (Exception e) {
-        	e.printStackTrace();
-        }
     }
 
     @Override@SuppressWarnings("Duplicates")
@@ -81,16 +49,7 @@ public class GKTG_DataProcess extends DataProcessor
         for (File file : dataFiles)
         {
             // 처리할 파일명 로그 print
-        	Log.print("INFO : File NAME -> {0}", file.getAbsoluteFile());
-            
-            if(file.getName().contains("_max_")) {
-            	this.generateGktgImageFiles(file, dbManager, processorInfo, "gtgmax", "GTGMAX");	
-            	this.generateGktgImageFiles(file, dbManager, processorInfo, "gtgmax2", "GTGMAXSEV");//신 최대난류 추가
-            } else if(file.getName().contains("_cat_")) {
-            	this.generateGktgImageFiles(file, dbManager, processorInfo, "gtgdef", "GTGDEF");
-            } else if(file.getName().contains("_mwt_")) {
-            	this.generateGktgImageFiles(file, dbManager, processorInfo, "gtgmwt", "GTGMWT");
-            }
+        	Log.print("INFO : File NAME -> {0}", file.getAbsoluteFile()); 
                  
             if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
             {

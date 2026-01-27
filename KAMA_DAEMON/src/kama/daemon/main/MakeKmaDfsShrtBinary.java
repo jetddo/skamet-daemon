@@ -41,7 +41,7 @@ public class MakeKmaDfsShrtBinary {
 	
 //	private final String GATHER_KMA_DFS_SHRT_API_URL = "http://10.2.10.8/TEST/dfs_shrt_csv/{issuedTm}_{fcstTm}_{element}.csv";
 	
-	private final String[] KMA_DFS_SHRT_ELEMENTS = {"PCP", "SNO", "POP", "REH", "SKY", "PTY", "TMN", "TMP", "TMX", "VEC", "WSD"};
+	private final String[] KMA_DFS_SHRT_ELEMENTS = {"PCP", "POP", "REH", "SKY", "TMN", "TMP", "TMX", "VEC", "WSD"};
 	
 //	private final String[] KMA_DFS_SHRT_ELEMENTS = {"PCP"};
 	

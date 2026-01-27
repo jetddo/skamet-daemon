@@ -154,7 +154,7 @@ public class MakeKimRdpsRegridBinary {
 		Calendar cal = new GregorianCalendar();
 		
 		cal.setTime(new Date());
-		cal.add(Calendar.HOUR_OF_DAY, -48);
+		cal.add(Calendar.HOUR_OF_DAY, -24);
 		
 		Date startTm = cal.getTime();	
 		

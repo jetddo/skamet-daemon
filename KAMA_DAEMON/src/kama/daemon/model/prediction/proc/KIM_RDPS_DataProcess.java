@@ -184,7 +184,7 @@ public class KIM_RDPS_DataProcess extends DataProcessor
             if (file.getName().endsWith(".gb2"))
             {
             	
-//            	this.generateKimRdpsWintemImageFiles(file, dbManager, processorInfo);         
+            	this.generateKimRdpsWintemImageFiles(file, dbManager, processorInfo);         
             	
                 if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
                 {

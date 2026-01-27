@@ -135,6 +135,10 @@ public class GktgImageGenerator {
 				
 				Variable var = ncFile.findVariable(this.varName);
 				
+				if(this.varName.equals("GTGMAXSEV")) {
+					var = ncFile.findVariable("GTGMAX");
+				}
+				
 				List<Range> rangeList = new ArrayList<Range>();
 				rangeList.add(new Range(j, j));						
 				rangeList.add(new Range(modelGridUtil.getModelHeight() - boundXY.getTop() - 1, modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));
@@ -148,7 +152,7 @@ public class GktgImageGenerator {
 				//String imgFileName = fileName.replace(".nc", "") + "_" + String.format("%03d", j+1) + ".png";
 				String imgFileName = "";
 				
-				if(this.varName.equals("GTGMAX")) {
+				if(this.varName.equals("GTGMAXSEV")) {
 					imgFileName = fileName.replace(".nc", "").replace("_max_", "_max2_") + "_" + String.format("%03d", j+1) + ".png";
 				}else {
 					imgFileName = fileName.replace(".nc", "") + "_" + String.format("%03d", j+1) + ".png";

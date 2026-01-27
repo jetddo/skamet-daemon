@@ -330,7 +330,7 @@ public class HobsImageGenerator {
 				}
 				
 				double ws = Math.sqrt(u * u + v * v); // 바람 속도
-				double wd = Math.atan2(v, u) * 180 / Math.PI; // 바람 방향 (degree)
+				double wd = Math.atan2(u, v) * 180 / Math.PI; // 바람 방향 (degree)
 				
 				double[][] coordinates = (double[][])polygonData.get("coordinates");
 					
@@ -354,7 +354,7 @@ public class HobsImageGenerator {
 						
 				double arrowLength = Math.sqrt(Math.pow(xPoints[2] - xPoints[0], 2) + Math.pow(yPoints[2] - yPoints[0], 2));
 								
-				this.drawArrow(ig2, xPoints[0], yPoints[0], Math.sqrt(ws*arrowLength)*10, wd + 180, 4, 12);
+				this.drawArrow(ig2, xPoints[0], yPoints[0], Math.sqrt(ws*arrowLength)*10, wd-90, 4, 12);
 			}
 			
 		} catch (Exception e) {

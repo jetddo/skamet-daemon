@@ -186,28 +186,28 @@ private void sendFileToAcom(List<Map<String, Object>> fileInfoList, ProcessorInf
             	
             	this.generateKimGdpsWintemImageFiles(file, dbManager, processorInfo);       
             	
-                if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
-                {
-                    query = buildFileInfoQuery(processorInfo, new File(processorInfo.FileSavePath, file.getName()));
-                    queriesList.add(query);
-                }
+//                if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
+//                {
+//                    query = buildFileInfoQuery(processorInfo, new File(processorInfo.FileSavePath, file.getName()));
+//                    queriesList.add(query);
+//                }
                 
             }
         }
 
         // 쿼리 한꺼번에 처리
-        for (String savedQuery : queriesList)
-        {
-            dbManager.executeUpdate(savedQuery);
-        }
-
-        for (File file : dataFiles)
-        {
-            if (file.exists())
-            {
-                file.delete();
-            }
-        }
+//        for (String savedQuery : queriesList)
+//        {
+//            dbManager.executeUpdate(savedQuery);
+//        }
+//
+//        for (File file : dataFiles)
+//        {
+//            if (file.exists())
+//            {
+//                file.delete();
+//            }
+//        }
 
         dbManager.commit();
     }

@@ -42,7 +42,6 @@ public class ModelGridUtil {
 		KMAPP_YEOSU,
 		KIM_GDPS,
 		KIM_RDPS,
-		KIM_RDPS_REGRID,
 		GKTG_ARCV,
 		HOBS_RKSI,
 		HOBS_RKPC,
@@ -291,16 +290,6 @@ public class ModelGridUtil {
 			
 			this.modelWidth = 1049;
 			this.modelHeight = 839;
-	
-			this.byteOrder = ByteOrder.BIG_ENDIAN;
-			
-		} else if(Model.KIM_RDPS_REGRID.equals(model)) {
-			
-			this.modelWidth = 1049;
-			this.modelHeight = 839;
-			
-			this.defaultLatInterval = 0.0291816465609967;
-			this.defaultLonInterval = 0.0420522180222373;
 	
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 			

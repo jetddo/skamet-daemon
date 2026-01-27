@@ -8,10 +8,16 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+
+import kama.daemon.common.db.AmisDataBaseManager;
 import kama.daemon.common.db.DataProcessor;
 import kama.daemon.common.db.DatabaseManager;
 import kama.daemon.common.db.struct.ProcessorInfo;
 import kama.daemon.common.util.DaemonSettings;
+import kama.daemon.common.util.DaemonUtils;
 
 public class FOIS_LOCAL_DataProcess extends DataProcessor {
 
@@ -20,6 +26,36 @@ public class FOIS_LOCAL_DataProcess extends DataProcessor {
     private static final int FILE_DATE_INDEX_POS = 32; // ieodo_20190904.dat (method overridden)
     private static final int[] DB_PRIMARY_KEY_INDEXES = { 0 }; // TM
     private final int INSERT_QUERY = 1;
+    
+    private AmisDataBaseManager amisDbmanager;
+    
+    private boolean amisDbInitialize() {
+		
+		Configurations configs = new Configurations();
+		
+		try {
+		
+			Configuration config = configs.properties(new File(DaemonUtils.getConfigFilePath()));
+			
+			this.amisDbmanager = new AmisDataBaseManager(config);
+			this.amisDbmanager.setAutoCommit(false);
+			
+		} catch (ConfigurationException e ) {
+			
+			System.out.println("Error : AOMS_INCHEON_DataProcess.amisDbinitialize -> " + e);
+			
+			this.amisDbmanager.safeClose();
+			
+			return false;
+		}
+		
+		return true;
+	}
+    
+	private void amisDbDestroy() {
+		
+		this.amisDbmanager.safeClose();
+	}
 	
 	public FOIS_LOCAL_DataProcess(DaemonSettings settings) {
 		super(settings, DATAFILE_PREFIX);
@@ -136,6 +172,30 @@ public class FOIS_LOCAL_DataProcess extends DataProcessor {
 		
 		return query;
 	}
+	
+	private String buildAmisDbQuery(String[] valueList) {
+		
+		String query = "INSERT INTO KAMAWEB.FOIS VALUES (";
+		
+		for(int i=0 ; i<valueList.length ; i++) {
+			
+			String value = valueList[i];
+			
+			if(i == 0) {				
+				query += "TO_TIMESTAMP('" + value + "','YYYYMMDDHH24MISS.FF3')";
+			} else {
+				query += "'" + value + "'";
+			}
+			
+			if(i < valueList.length-1) {
+				query += ",";
+			}
+		}
+		
+		query += ")";
+		
+		return query;
+	}
 
 	/**
      * 각 (하나의) 파일에 대한 데이터 처리 함수
@@ -153,6 +213,15 @@ public class FOIS_LOCAL_DataProcess extends DataProcessor {
     	String query = this.buildQuery(valueList);
     	
     	dbManager.executeQuery(query);
+    	
+    	this.amisDbInitialize();
+    	
+    	String amisQuery = this.buildAmisDbQuery(valueList);
+    	
+    	this.amisDbmanager.insert(amisQuery);
+    	this.amisDbmanager.commit();
+    	
+    	this.amisDbDestroy();
     }
 	
 	@Override

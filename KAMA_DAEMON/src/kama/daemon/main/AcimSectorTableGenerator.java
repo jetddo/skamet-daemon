@@ -61,7 +61,7 @@ public class AcimSectorTableGenerator {
 	String[] sectorNames = new String[] { "서해", "동해", "포항", "대구", "남해", "군산", "광주", "제주북부", "제주남부" };
 	
 	// 제주남부 빼고 다 180, 제주남부는 290임
-	String[] sectorThresholds = new String[] { "180", "180", "180", "180", "180", "180", "180", "180", "290" };
+	String[] sectorThresholds = new String[] { "180", "180", "260", "260", "180", "180", "180", "180", "290" };
 	
 	Color[] sectorBackgroundColors = new Color[] {
 		new Color(223,230,247), // 서해
@@ -366,7 +366,7 @@ public class AcimSectorTableGenerator {
 	private boolean generateSectorTable(String issuedTmStr, List<NetcdfDataset> modelFileList) {
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
-		SimpleDateFormat sdf2 = new SimpleDateFormat("yy-MM-dd");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("MM-dd");
 		SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy-MM-dd HH");
 		
 		try {
@@ -491,7 +491,7 @@ public class AcimSectorTableGenerator {
 	            	
 	            	if(i == 0) {
 						
-						g.setColor(new Color(255,231,216)); // 배경색 설정
+	            		g.setColor(new Color(255,255,255)); // 배경색 설정
 						g.fillRect(x, y, currentCellWidth, currentCellHeight); // 셀 배경색 채우기
 	            	
 						// 첫 번째 행은 예측 시간 표시
@@ -500,23 +500,40 @@ public class AcimSectorTableGenerator {
 							g.setColor(Color.BLACK);
 							g.setFont(font1);
 							
-							this.setCellText("DATE", g, x-4, y, cellWidth, cellHeight, font1);
+							//this.setCellText("DATE", g, x-4, y, cellWidth, cellHeight, font1);
 							
 						}
 						
 					} else if(i == 1) {
 						
-						g.setColor(new Color(255,231,216)); // 배경색 설정
+						g.setColor(new Color(255,255,255)); // 배경색 설정
 						g.fillRect(x, y, currentCellWidth, currentCellHeight); // 셀 배경색 채우기
 						
 						// 첫 번째 행은 예측 시간 표시
 						if (j == 0) {
+					        
+					        // 셀 대각선 그리기
+					        g.setColor(Color.BLACK);
+							g.setStroke(new BasicStroke(1)); // 선 굵기 5px
+							
+							int x0 = j * cellWidth + tableLeftMargin + Math.min(j, extraWidth); // 나머지 분배
+			                int y0 = (i-1) * cellHeight + tableTopMargin + Math.min((i-1), extraHeight); // 나머지 분배
+			                
+							int x1 = (j+1) * cellWidth + tableLeftMargin + Math.min((j+1), extraWidth); // 나머지 분배
+			                int y1 = (i+1) * cellHeight + tableTopMargin + Math.min((i+1), extraHeight); // 나머지 분배
+							
+							g.drawLine(x0, y0, x1, y1);
 							
 							g.setColor(Color.BLACK);
 							g.setFont(font1);
 							
-							this.setCellText("TIME", g, x-1, y - font1.getSize()/2, cellWidth, cellHeight, font1);
-							this.setCellText("(UTC)", g, x+3, y + font2.getSize()/2+2, cellWidth, cellHeight, font2);
+							this.setCellText("TIME", g, x0+14, y0 - font1.getSize()/2, cellWidth, cellHeight, font1);
+							
+							g.setFont(font2);
+							this.setCellText("(UTC)", g, x0+18, y0 + font2.getSize()/2+2, cellWidth, cellHeight, font2);
+							
+							g.setFont(font1);						
+							this.setCellText("섹터", g, x0-12, y + font1.getSize()/2-6, cellWidth, cellHeight, font1);
 							
 						} else {
 							
@@ -529,7 +546,15 @@ public class AcimSectorTableGenerator {
 							this.setCellText(fcstHourText, g, x, y, currentCellWidth, currentCellHeight, font1);						
 						}
 						
-					} else {
+					}  else {
+						
+						if (i == 2) {
+							
+					        // 셀 이중선 그리기
+					        g.setColor(Color.BLACK);
+							g.setStroke(new BasicStroke(1)); // 선 굵기 5px
+							g.drawLine(tableLeftMargin, y-3, tableLeftMargin+tableWidth, y-3);
+						}
 						
 						// 나머지 행은 섹터 이름 표시
 						if (j == 0) {
@@ -552,15 +577,15 @@ public class AcimSectorTableGenerator {
 							
 							Color thresholdColor = null;
 							
-							if (thresholdRatio == 0) {
+							if (thresholdRatio <= 10) {
 								thresholdColor = new Color(255, 255, 255); // 0인 경우 흰색
-							} else if (thresholdRatio > 0 && thresholdRatio < 3) {
+							} else if (thresholdRatio > 10 && thresholdRatio < 19) {
 								thresholdColor = new Color(128, 228, 16); // ~3
-							} else if (thresholdRatio >=3 && thresholdRatio < 10) {
+							} else if (thresholdRatio >=20 && thresholdRatio < 29) {
 								thresholdColor = new Color(0, 183, 80); // 3~10
-							} else if (thresholdRatio >= 10 && thresholdRatio < 20) {
+							} else if (thresholdRatio >= 30 && thresholdRatio < 39) {
 								thresholdColor = new Color(255, 252, 0); // 10~20
-							} else if (thresholdRatio >= 20 && thresholdRatio < 30) {
+							} else if (thresholdRatio >= 40 && thresholdRatio < 49) {
 								thresholdColor = new Color(255, 130, 0); // 20~30
 							} else {
 								thresholdColor = new Color(255, 0, 0); // 30~
@@ -606,11 +631,17 @@ public class AcimSectorTableGenerator {
 	            		
 						g.setColor(Color.BLACK);
 						g.setStroke(new BasicStroke(1)); // 선 굵기 5px
-		                g.drawRect(x, y, currentCellWidth, currentCellHeight);	
+						
+						if(i == 1 && j == 0) {
+								
+						} else {
+							g.drawRect(x, y, currentCellWidth, currentCellHeight);
+						}
 	            	}
 	            }
 	        }
-	    	
+			
+			
 	        // 셀 테두리 그리기
 	        g.setStroke(new BasicStroke(3)); // 선 굵기 5px
 	    	g.setColor(Color.BLACK);
@@ -689,14 +720,27 @@ public class AcimSectorTableGenerator {
 			infoStringList.add(infoString);
 		}
 		
-		int infoTopMargin = (height - tableBottomMargin) + 30;
+		Collections.sort(infoStringList, new Comparator<String>() {
+
+			@Override
+			public int compare(String arg0, String arg1) {
+				
+				String feet0 = arg0.split("ft")[0];
+				String feet1 = arg1.split("ft")[0];
+				
+				return Integer.valueOf(feet0)-Integer.valueOf(feet1);
+			}
+			
+		});
+		
+		int infoTopMargin = (height - tableBottomMargin) + 15;
 		
 		Font font = this.getFont(18, true);
 		
         g.setFont(font);
         g.setColor(Color.BLACK);
         
-        g.drawString("기준고도:", tableLeftMargin, infoTopMargin + font.getSize()); // 범례 텍스트 위치 조정);
+        g.drawString("기준고도", tableLeftMargin, infoTopMargin + font.getSize()); // 범례 텍스트 위치 조정);
         
 		for (int i = 0; i < infoStringList.size(); i++) {
 			String infoString = infoStringList.get(i);
@@ -749,9 +793,9 @@ public class AcimSectorTableGenerator {
         g.setFont(titleFont);
         g.setColor(Color.BLACK);
         
-        String titleText = "대류운 정보";
+        String titleText = "대류운 예측 정보";
         
-        g.drawString(titleText, this.getCellTextLeftMargin(titleText, width, titleFont), topMargin + titleFont.getSize() + 10); // 수직 중앙 정렬
+        g.drawString(titleText, this.getCellTextLeftMargin(titleText, width, titleFont)+50, topMargin + titleFont.getSize() + 10); // 수직 중앙 정렬
         
         g.setFont(infoFont);
         g.drawString("발표시각: " + sdf.format(issuedTm) + "UTC", leftMargin + logoSize + 15, topMargin + titleHeight + infoFont.getSize() + 15); // 범례 텍스트 위치 조정);
@@ -764,7 +808,7 @@ public class AcimSectorTableGenerator {
 	private void createLegend(Graphics2D g, int width, int height, int tableRightMargin, int tableBottomMargin, Font font) {
 		
 		// 색상 셀과 텍스트 설정
-		String[] thresholds = { "~3", "3~10", "10~20", "20~30", "30~" };
+		String[] thresholds = { "10~19", "20~29", "30~39", "40~49", "50~" };
 		Color[] colors = { new Color(128,228,16), new Color(0,183,80), new Color(255,252,0), new Color(255,130,0), new Color(255,0,0) };
 		
 		int legendWidth = width / 3; // 전체 너비에서 여백을 뺀 너비
@@ -782,9 +826,9 @@ public class AcimSectorTableGenerator {
         g.setFont(font);
         g.setColor(Color.BLACK);
         
-        String legendTitle = "범례: ";
+        String legendTitle = "대류운 면적(%): ";
         
-        g.drawString("범례: ", legendLeftMargin - legendTitle.length()*font.getSize()/3*2, legendTopMargin + font.getSize()); // 범례 텍스트 위치 조정);
+        g.drawString(legendTitle, legendLeftMargin - legendTitle.length()*font.getSize()/3*2, legendTopMargin + font.getSize()); // 범례 텍스트 위치 조정);
 
 		for (int i = 0; i < thresholds.length; i++) {
 			
@@ -803,6 +847,8 @@ public class AcimSectorTableGenerator {
 		g.setColor(Color.BLACK);
 		g.setStroke(new BasicStroke(2)); // 선 굵기 1px
 		g.drawRect(legendLeftMargin, legendTopMargin, legendWidth, legendHeight); // 테두리 그리기
+		
+		g.drawString("기반모델: UM GDAPS", legendLeftMargin - legendTitle.length()*font.getSize()/3*2, legendTopMargin + font.getSize()*3); // 범례 텍스트 위치 조정);
 	}
 	
 	private int getCellTextLeftMargin(String text, int cellWidth, Font font) {

@@ -150,7 +150,7 @@ public class AOMS_INCHEON_DataProcess extends DataProcessor {
 	
 	private String buildAmisDbQuery(String[] valueList) {
 		
-		String query = "INSERT INTO AMISUSER.AOMS VALUES (";
+		String query = "INSERT INTO KAMAWEB.AOMS VALUES (";
 		
 		for(int i=0 ; i<valueList.length ; i++) {
 			
@@ -194,6 +194,7 @@ public class AOMS_INCHEON_DataProcess extends DataProcessor {
     	String amisQuery = this.buildAmisDbQuery(valueList);
     	
     	this.amisDbmanager.insert(amisQuery);
+    	this.amisDbmanager.commit();
     	
     	this.amisDbDestroy();
     }

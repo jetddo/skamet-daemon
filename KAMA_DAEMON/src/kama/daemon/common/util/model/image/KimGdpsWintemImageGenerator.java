@@ -248,7 +248,7 @@ public class KimGdpsWintemImageGenerator {
 				
 				wintemBaseImg.getGraphics().drawImage(bi, 0, 0, wintemBaseImg.getWidth(), wintemBaseImg.getHeight(), null);
 				
-				this.appendWintemLabel(wintemBaseImg, issuedDt, fcstDt, "FL" + heightText, fcstHour);
+				this.appendWintemLabel(wintemBaseImg, issuedDt, fcstDt, heightText, fcstHour);
 				
 				wintemBaseImg = Thumbnails.of(wintemBaseImg).imageType(BufferedImage.TYPE_INT_ARGB).forceSize(resizeImgWidth, resizeImgHeight).asBufferedImage();
 				
@@ -357,7 +357,7 @@ public class KimGdpsWintemImageGenerator {
 		for(int i=0 ; i<heightIndexList.length ; i++) {
 			
 			String heightIndex = heightIndexList[i];
-			
+										
 			Variable varUWind = ncFile.findVariable("u-component_of_wind_isobaric");
 			Variable varVWind = ncFile.findVariable("v-component_of_wind_isobaric");
 			Variable varTemp = ncFile.findVariable("Temperature_isobaric");
@@ -368,8 +368,8 @@ public class KimGdpsWintemImageGenerator {
 			rangeList.add(new Range(modelGridUtil.getModelHeight() - boundXY.getTop() - 1, modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));
 			rangeList.add(new Range(boundXY.getLeft(), boundXY.getRight()));
 		
-			valuesUWindList.add(GridCalcUtil.convertStorageToValuesReverse(varVWind.read(rangeList).getStorage(), rows, cols));
-			valuesVWindList.add(GridCalcUtil.convertStorageToValuesReverse(varUWind.read(rangeList).getStorage(), rows, cols));
+			valuesUWindList.add(GridCalcUtil.convertStorageToValuesReverse(varUWind.read(rangeList).getStorage(), rows, cols));
+			valuesVWindList.add(GridCalcUtil.convertStorageToValuesReverse(varVWind.read(rangeList).getStorage(), rows, cols));
 			valuesTempList.add(GridCalcUtil.convertStorageToValuesReverse(varTemp.read(rangeList).getStorage(), rows, cols));
 		}
 		

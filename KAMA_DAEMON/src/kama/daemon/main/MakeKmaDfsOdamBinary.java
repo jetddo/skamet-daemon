@@ -40,7 +40,7 @@ public class MakeKmaDfsOdamBinary {
 	private final String GATHER_KMA_DFS_ODAM_API_URL = "http://api.kma.go.kr/cgi-bin/url/nph-dfs_odam_grd?tmfc={obsTm}&vars={element}";
 	//private final String GATHER_KMA_DFS_ODAM_API_URL = "http://api.kma.go.kr/cgi-bin/url/nph-dfs_odam_grd?tmfc={obsTm}&vars={element}";
 	
-	private final String[] KMA_DFS_ODAM_ELEMENTS = {"RN1", "REH", "T1H", "VEC", "WSD", "PTY"};
+	private final String[] KMA_DFS_ODAM_ELEMENTS = {"RN1", "REH", "T1H", "VEC", "WSD"};
 	
 	private final int KMA_DFS_ODAM_GRID_COUNT = 37697;
 	

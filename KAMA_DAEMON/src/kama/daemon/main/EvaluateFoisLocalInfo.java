@@ -70,8 +70,14 @@ public class EvaluateFoisLocalInfo {
 			cal.setTime(currentDate);
 			cal.add(Calendar.DAY_OF_MONTH, -1);
 			
-			String startTimeStr = sdf.format(cal.getTime());
-			String endTimeStr =   sdf.format(currentDate);
+			Date endTime = cal.getTime();
+			
+			cal.add(Calendar.DAY_OF_MONTH, -1);
+			
+			Date startTime = cal.getTime();
+			
+			String startTimeStr = sdf.format(startTime);
+			String endTimeStr =   sdf.format(endTime);
 			
 			System.out.println("-> StartDate: " + startTimeStr + ", endDate: " + endTimeStr);
 			

@@ -14,6 +14,7 @@ import kama.daemon.common.util.model.BoundXY;
 import kama.daemon.common.util.model.GridCalcUtil;
 import kama.daemon.common.util.model.ModelGridUtil;
 import kama.daemon.common.util.model.legendfilter.GktgArcvLegendFilter;
+import kama.daemon.common.util.model.legendfilter.KimGdpsLegendFilter;
 import net.coobird.thumbnailator.Thumbnails;
 import ucar.ma2.Range;
 import ucar.nc2.Variable;

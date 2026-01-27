@@ -388,7 +388,7 @@ public class KimRdpsRegridWintemImageGenerator {
 				
 				wintemBaseImg.getGraphics().drawImage(bi, 0, 0, wintemBaseImg.getWidth(), wintemBaseImg.getHeight(), null);
 				
-				this.appendWintemLabel(wintemBaseImg, issuedDt, fcstDt, "FL" + heightText, fcstHour);
+				this.appendWintemLabel(wintemBaseImg, issuedDt, fcstDt, heightText, fcstHour);
 				
 				wintemBaseImg = Thumbnails.of(wintemBaseImg).imageType(BufferedImage.TYPE_INT_ARGB).forceSize(resizeImgWidth, resizeImgHeight).asBufferedImage();
 				
@@ -589,8 +589,8 @@ public class KimRdpsRegridWintemImageGenerator {
 			rangeList.add(new Range(modelGridUtil.getModelHeight() - boundXY.getTop() - 1, modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));
 			rangeList.add(new Range(boundXY.getLeft(), boundXY.getRight()));
 		
-			valuesUWindList.add(GridCalcUtil.convertStorageToValues(varVWind.read(rangeList).getStorage(), rows, cols));
-			valuesVWindList.add(GridCalcUtil.convertStorageToValues(varUWind.read(rangeList).getStorage(), rows, cols));
+			valuesUWindList.add(GridCalcUtil.convertStorageToValues(varUWind.read(rangeList).getStorage(), rows, cols));
+			valuesVWindList.add(GridCalcUtil.convertStorageToValues(varVWind.read(rangeList).getStorage(), rows, cols));
 			valuesTempList.add(GridCalcUtil.convertStorageToValues(varTemp.read(rangeList).getStorage(), rows, cols));
 		}
 		
