@@ -45,7 +45,8 @@ public class ModelGridUtil {
 		GKTG_ARCV,
 		HOBS_RKSI,
 		HOBS_RKPC,
-		HOBS_RKNY
+		HOBS_RKNY,
+		KIM_GKTG
 	}
 	
 	// 격자 기준 좌표 위치
@@ -321,6 +322,16 @@ public class ModelGridUtil {
 
 			this.modelWidth = 321;
 			this.modelHeight = 321;
+
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+
+		} else if (Model.KIM_GKTG.equals(model)) {
+
+			this.modelWidth = 4320;
+			this.modelHeight = 2160;
+			
+			this.defaultLatInterval = 1/12;
+			this.defaultLonInterval = 1/12;
 
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 
