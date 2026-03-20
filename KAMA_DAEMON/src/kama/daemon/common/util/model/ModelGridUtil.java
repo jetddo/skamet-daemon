@@ -330,8 +330,8 @@ public class ModelGridUtil {
 			this.modelWidth = 4320;
 			this.modelHeight = 2160;
 			
-			this.defaultLatInterval = 1/12;
-			this.defaultLonInterval = 1/12;
+			this.defaultLatInterval = 1d/12d;
+			this.defaultLonInterval = 1d/12d;
 
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 

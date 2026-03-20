@@ -18,10 +18,10 @@ public class ModelGridTest3 {
 		// TODO Auto-generated method stub
 //		
 		
-		String latPath = "F:\\data\\datastore\\grid\\gdps_lat.bin";
-		String lonPath = "F:\\data\\datastore\\grid\\gdps_lon.bin";
+		String latPath = "F:\\data\\datastore\\grid\\kim_gktg_lat.bin";
+		String lonPath = "F:\\data\\datastore\\grid\\kim_gktg_lon.bin";
 		
-		ModelGridUtil modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.GDPS, latPath, lonPath);
+		ModelGridUtil modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GKTG, latPath, lonPath);
 		
 		modelGridUtil.setMultipleGridBoundInfoforLatLonGrid(50, 20, 110, 150);
 		BoundXY boundXY = modelGridUtil.getBoundXY();
@@ -32,17 +32,17 @@ public class ModelGridTest3 {
 		System.out.println(":: 한반도영역 원본 좌표계");
 		System.out.println(boundXY.getLeft() + ", " + boundXY.getRight() + ", " + boundXY.getTop() + ", " + boundXY.getBottom());		
 		
-		NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:\\KAMA_AAMI\\2025\\항기청_수신\\항기청_수신_20250715\\ACIM_sample\\amo_gdum_acim_f00_2025071212.nc", null);
+		NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:\\KAMA_AAMI\\2026\\항기청_수신\\항기청_수신_20260318\\ACIM_CNVT\\amo_kimg_acim_cnvt_f00_2026031800.nc", null);
 		
 		System.out.println(ncFile.getLocation());
 		
-		Variable var = ncFile.findVariable("CLTOP");
+		Variable var = ncFile.findVariable("CCT");
 		
 		List<Range> rangeList = new ArrayList<Range>();
-		rangeList.add(new Range(modelGridUtil.getModelHeight() - boundXY.getTop() - 1, modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));
+		rangeList.add(new Range(boundXY.getBottom(), boundXY.getTop()));
 		rangeList.add(new Range(boundXY.getLeft(), boundXY.getRight()));
 		
-		Float[][] values = GridCalcUtil.convertStorageToValuesReverse(var.read(rangeList).getStorage(), rows, cols);
+		Float[][] values = GridCalcUtil.convertStorageToValues(var.read(rangeList).getStorage(), rows, cols);
 		
 		System.out.println(":: 한반도영역 모델 좌표계");
 		System.out.println(boundXY.getLeft() + ", " + boundXY.getRight() + ", " + (modelGridUtil.getModelHeight() - boundXY.getTop() - 1) + ", " + (modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));		
@@ -58,16 +58,31 @@ public class ModelGridTest3 {
 		
 		//50, 20, 110, 150
 		
+		
+		
 		// 별모양 폴리곤
 		List<double[]> polygon = Arrays.asList(
-            new double[]{126.6907, 34.2532},
-            new double[]{127.3279, 34.2532},
-            new double[]{127.3142, 35.1272},
-            new double[]{127.6465, 35.2237},
-            new double[]{127.825, 35.5037},
-            new double[]{126.8033, 35.4992},
-            new double[]{126.6907, 34.2532}
-        );
+			    new double[]{127.1911, 36.7386},
+			    new double[]{127.3486, 36.8383},
+			    new double[]{127.5611, 36.9711},
+			    new double[]{129.0811, 35.9036},
+			    new double[]{129.1569, 35.4117},
+			    new double[]{130.1700, 35.4117},
+			    new double[]{129.8847, 35.2089},
+			    new double[]{129.3231, 34.7886},
+			    new double[]{129.2333, 34.7231},
+			    new double[]{129.1667, 34.6667},
+			    new double[]{129.0178, 34.5031},
+			    new double[]{128.4989, 34.5031},
+			    new double[]{128.4989, 34.7653},
+			    new double[]{128.4989, 35.2103},
+			    new double[]{127.8311, 35.5031},
+			    new double[]{127.8186, 35.5178},
+			    new double[]{127.6144, 35.7531},
+			    new double[]{127.6144, 35.8636},
+			    new double[]{127.6144, 36.2031},
+			    new double[]{127.1911, 36.7386}
+			);
 		
 		double[] polygonExtent = getPolygonExtent(polygon);
 		
@@ -129,7 +144,14 @@ public class ModelGridTest3 {
 				//System.out.println("Point: " + pointLonLat.getLon() + ", " + pointLonLat.getLat() + " is in polygon: " + isInPolygon);
 				
 				if (isInPolygon) {
-					System.out.print("T ");
+					
+					if(values[cropModelBottom - i][j - cropModelLeft] >= 180) {
+						System.out.print("* ");
+					} else {
+						System.out.print("0 ");
+					}
+					
+					
 				} else {
 					System.out.print("- ");
 				}
