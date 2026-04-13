@@ -13,23 +13,23 @@ import kama.daemon.common.util.model.BoundLonLat;
 import kama.daemon.common.util.model.BoundXY;
 import kama.daemon.common.util.model.GridCalcUtil;
 import kama.daemon.common.util.model.ModelGridUtil;
-import kama.daemon.common.util.model.legendfilter.KimGktgLegendFilter;
+import kama.daemon.common.util.model.legendfilter.GktgArcvLegendFilter;
 import net.coobird.thumbnailator.Thumbnails;
 import ucar.ma2.Range;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
-public class KimGktgImageGeneratorTest {
+public class KfipAsiaImageGeneratorTest {
 	
 	
 	private ModelGridUtil modelGridUtil;
 	
-	private final int imageExpandFactor = 10;
+	private final int imageExpandFactor = 30;
 	private final int imageResizeFactor = 2;
 	
-	private String varName = "GTGMAX";
+	private String varName = "KIMFIP";
 	
-	public KimGktgImageGeneratorTest() {
+	public KfipAsiaImageGeneratorTest() {
 		
 			
 		this.initCoordinates();
@@ -37,20 +37,20 @@ public class KimGktgImageGeneratorTest {
 
 	private void initCoordinates() {
 		
-		System.out.println("KimGdpsImageGenerator [ Initailize Coordinate Systems ]");
+		System.out.println("KfipAsiaImageGenerator [ Initailize Coordinate Systems ]");
 		
-		String coordinatesLatPath = "F:/data/datastore/grid/kim_gktg_lat.bin";
-		String coordinatesLonPath = "F:/data/datastore/grid/kim_gktg_lon.bin";
+		String coordinatesLatPath = "F:/data/datastore/grid/kfipAsia_arcv_lat.bin";
+		String coordinatesLonPath = "F:/data/datastore/grid/kfipAsia_arcv_lon.bin";
 		
-		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GKTG, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath);
+		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.GKTG_ARCV, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath);
 	}
 	
 	public void generateImages(NetcdfDataset ncFile, String fileName, String savePath) {
 
-		System.out.println("KimGdpsImageGenerator [ Start Create Tile Images ]");		
-		System.out.println("\t-> Create KimGdps Image Grid List");
+		System.out.println("KfipAsiaImageGenerator [ Start Create Tile Images ]");		
+		System.out.println("\t-> Create KfipAsia Image Grid List");
 		
-		double[] mapBound = new double[]{80, -80, 0, 360};
+		double[] mapBound = new double[]{50, 20, 110, 150};
 		
 		this.modelGridUtil.setMultipleGridBoundInfoforLatLonGrid(mapBound);
 		
@@ -59,7 +59,7 @@ public class KimGktgImageGeneratorTest {
 		System.out.println("\t-> Create Image Bound [" + mapBound[0] + ", " + mapBound[1] + ", " + mapBound[2] + ", " + mapBound[3] + "]");
 		BoundLonLat boundLonLat = this.generateImage(ncFile, fileName, savePath);
 		
-		System.out.println("KimGdpsImageGenerator [ End Create Images ]");
+		System.out.println("KfipAsiaImageGenerator [ End Create Images ]");
 	}
 	
 	public BoundLonLat generateImage(NetcdfDataset ncFile, String fileName, String savePath) {
@@ -74,7 +74,7 @@ public class KimGktgImageGeneratorTest {
 			
 			System.out.println(boundLonLat);
 				
-			KimGktgLegendFilter kimGktgLegendFilter = new KimGktgLegendFilter();
+			GktgArcvLegendFilter kfipAsiaArcvLegendFilter = new GktgArcvLegendFilter();
 	
 			int imgHeight = (int)Math.floor((boundLonLat.getTop() - boundLonLat.getBottom()) * this.imageExpandFactor * this.imageResizeFactor); 		    			
 			int imgWidth = (int)Math.floor((boundLonLat.getRight() - boundLonLat.getLeft()) * this.imageExpandFactor * this.imageResizeFactor);
@@ -91,7 +91,7 @@ public class KimGktgImageGeneratorTest {
 			
 			System.out.println("\t-> Process Attribute [GTGMAX]");
 			
-			for(int j=0 ; j<5 ; j++) {
+			for(int j=0 ; j<1 ; j++) {
 					
 				System.out.println("\t\t-> Start Read Variable [GTGMAX]");
 				
@@ -122,7 +122,7 @@ public class KimGktgImageGeneratorTest {
 						
 						float v = values[k][l];
 						
-						Color c = (Color)kimGktgLegendFilter.getClass().getMethod("getColor_" + this.varName, double.class).invoke(kimGktgLegendFilter, v);
+						Color c = (Color)kfipAsiaArcvLegendFilter.getClass().getMethod("getColor_" + this.varName, double.class).invoke(kfipAsiaArcvLegendFilter, v);
 						
 						if(c != null) {
 							
@@ -154,8 +154,6 @@ public class KimGktgImageGeneratorTest {
 					}
 				}
 				
-				getCropPosition(boundLonLat, mercatorRatio);
-				
 				bi = Thumbnails.of(bi).imageType(BufferedImage.TYPE_INT_ARGB).size(imgWidth / this.imageResizeFactor, imgHeight / this.imageResizeFactor).asBufferedImage();
 				ImageIO.write(bi, "PNG", imageFile);
 				System.out.println("\t\t-> End Write Image [" + imageFile.getAbsolutePath() + "]");
@@ -168,37 +166,22 @@ public class KimGktgImageGeneratorTest {
 		return boundLonLat;
 	}
 	
-	private void getCropPosition(BoundLonLat boundLonLat, double[] mercatorRatio) {
-		
-		double left = 100+180;
-		double bottom = 11;
-		double right = 157+180;
-		double top = 50.52;
-		
-		int y1 = (int)Math.floor(mercatorRatio[(int)Math.floor((boundLonLat.getTop() - top) * this.imageExpandFactor * this.imageResizeFactor)]);
-		int y2 = (int)Math.floor(mercatorRatio[(int)Math.floor((boundLonLat.getTop() - bottom) * this.imageExpandFactor * this.imageResizeFactor)]);
-		int x1 = (int)Math.floor((left - boundLonLat.getLeft()) * this.imageExpandFactor * this.imageResizeFactor);
-		int x2 = (int)Math.floor((right - boundLonLat.getLeft()) * this.imageExpandFactor * this.imageResizeFactor);
-		
-		System.out.println("Crop Position [x1: " + x1/2 + ", y1: " + y1/2 + ", x2: " + x2/2 + ", y2: " + y2/2 + "]");
-	}
-	
 	public static void main(String[] args) {
         
-		KimGktgImageGeneratorTest kimGktgImageGeneratorTest = new KimGktgImageGeneratorTest();
+		KfipAsiaImageGeneratorTest kfipAsiaArcvImageGeneratorTest = new KfipAsiaImageGeneratorTest();
                   
 		try {
 						
-			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:\\data\\datastore\\KIM_GKTG\\2026\\03\\04\\18\\amo_kimg_gktg_max_f00_2026030418.nc", null);
-			String fileName = "amo_kimg_gktg_max_f00_2026030418.nc";
-	        String savePath = "F:/data";
+			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/KAMA_AAMI/2025/항기청_수신/항기청_수신_20250610/amo_gdum_kfipAsia_f00_2025060812_arcv.nc", null);
+			String fileName = "amo_gdum_kfipAsia_f00_2025060812_arcv.nc";
+	        String savePath = "F:/data/kfipAsia_arcv_img";
 	        
-	        kimGktgImageGeneratorTest.generateImages(ncFile, fileName, savePath);
+	        kfipAsiaArcvImageGeneratorTest.generateImages(ncFile, fileName, savePath);
 	        
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 		}
 		
 		

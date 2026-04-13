@@ -46,7 +46,9 @@ public class ModelGridUtil {
 		HOBS_RKSI,
 		HOBS_RKPC,
 		HOBS_RKNY,
-		KIM_GKTG
+		KIM_GKTG,
+		KIM_KTG,
+		KFIP_ASIA
 	}
 	
 	// 격자 기준 좌표 위치
@@ -335,7 +337,24 @@ public class ModelGridUtil {
 
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 
-		} else {
+		} else if(Model.KIM_KTG.equals(model)) {
+			
+			this.modelWidth = 735;
+			this.modelHeight = 627;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KFIP_ASIA.equals(model)) {
+			
+			this.modelWidth = 673;
+			this.modelHeight = 444;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+			this.defaultLatInterval = 1d/12d;
+			this.defaultLonInterval = 1d/12d;
+			
+		}  else {
 			throw new IllegalArgumentException("지원하지 않는 모델입니다.");
 		}
 		
