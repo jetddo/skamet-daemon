@@ -13,7 +13,7 @@ import kama.daemon.common.util.model.BoundLonLat;
 import kama.daemon.common.util.model.BoundXY;
 import kama.daemon.common.util.model.GridCalcUtil;
 import kama.daemon.common.util.model.ModelGridUtil;
-import kama.daemon.common.util.model.legendfilter.GktgArcvLegendFilter;
+import kama.daemon.common.util.model.legendfilter.KfipAsiaLegendFilter;
 import net.coobird.thumbnailator.Thumbnails;
 import ucar.ma2.Range;
 import ucar.nc2.Variable;
@@ -39,10 +39,10 @@ public class KfipAsiaImageGeneratorTest {
 		
 		System.out.println("KfipAsiaImageGenerator [ Initailize Coordinate Systems ]");
 		
-		String coordinatesLatPath = "F:/data/datastore/grid/kfipAsia_arcv_lat.bin";
-		String coordinatesLonPath = "F:/data/datastore/grid/kfipAsia_arcv_lon.bin";
+		String coordinatesLatPath = "F:/data/datastore/grid/kfip_asia_lat.bin";
+		String coordinatesLonPath = "F:/data/datastore/grid/kfip_asia_lon.bin";
 		
-		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.GKTG_ARCV, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath);
+		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KFIP_ASIA, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath);
 	}
 	
 	public void generateImages(NetcdfDataset ncFile, String fileName, String savePath) {
@@ -50,7 +50,7 @@ public class KfipAsiaImageGeneratorTest {
 		System.out.println("KfipAsiaImageGenerator [ Start Create Tile Images ]");		
 		System.out.println("\t-> Create KfipAsia Image Grid List");
 		
-		double[] mapBound = new double[]{50, 20, 110, 150};
+		double[] mapBound = new double[]{50, 5, 90, 160};
 		
 		this.modelGridUtil.setMultipleGridBoundInfoforLatLonGrid(mapBound);
 		
@@ -74,7 +74,7 @@ public class KfipAsiaImageGeneratorTest {
 			
 			System.out.println(boundLonLat);
 				
-			GktgArcvLegendFilter kfipAsiaArcvLegendFilter = new GktgArcvLegendFilter();
+			KfipAsiaLegendFilter kfipAsiaArcvLegendFilter = new KfipAsiaLegendFilter();
 	
 			int imgHeight = (int)Math.floor((boundLonLat.getTop() - boundLonLat.getBottom()) * this.imageExpandFactor * this.imageResizeFactor); 		    			
 			int imgWidth = (int)Math.floor((boundLonLat.getRight() - boundLonLat.getLeft()) * this.imageExpandFactor * this.imageResizeFactor);
@@ -89,11 +89,11 @@ public class KfipAsiaImageGeneratorTest {
 			
 			double[] mercatorRatio = GridCalcUtil.calculateCumulativeArr(GridCalcUtil.getLatitudeRatioList(boundLonLat.getTop(), boundLonLat.getBottom(), imgHeight, imgHeight));
 			
-			System.out.println("\t-> Process Attribute [GTGMAX]");
+			System.out.println("\t-> Process Attribute ["+varName+"]");
 			
-			for(int j=0 ; j<1 ; j++) {
+			for(int j=14 ; j<15 ; j++) {
 					
-				System.out.println("\t\t-> Start Read Variable [GTGMAX]");
+				System.out.println("\t\t-> Start Read Variable [" + this.varName + "]");
 				
 				Variable var = ncFile.findVariable(this.varName);
 					
@@ -172,16 +172,16 @@ public class KfipAsiaImageGeneratorTest {
                   
 		try {
 						
-			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/KAMA_AAMI/2025/항기청_수신/항기청_수신_20250610/amo_gdum_kfipAsia_f00_2025060812_arcv.nc", null);
-			String fileName = "amo_gdum_kfipAsia_f00_2025060812_arcv.nc";
-	        String savePath = "F:/data/kfipAsia_arcv_img";
+			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/KAMA_AAMI/2026/항기청_수신/항기청_수신_20260407/amo_gdps_kfip_asia_f00_2026040700.nc", null);
+			String fileName = "amo_gdps_kfip_asia_f00_2026040700.nc";
+	        String savePath = "F:/data/kfip_asia_img";
 	        
 	        kfipAsiaArcvImageGeneratorTest.generateImages(ncFile, fileName, savePath);
 	        
 			
 			
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 		
 		
