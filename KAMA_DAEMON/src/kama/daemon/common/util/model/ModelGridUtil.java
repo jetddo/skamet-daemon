@@ -48,7 +48,7 @@ public class ModelGridUtil {
 		HOBS_RKNY,
 		KIM_GKTG,
 		KIM_KTG,
-		KFIP_ASIA
+		KIM_KFIP
 	}
 	
 	// 격자 기준 좌표 위치
@@ -344,7 +344,7 @@ public class ModelGridUtil {
 				
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 			
-		} else if(Model.KFIP_ASIA.equals(model)) {
+		} else if(Model.KIM_KFIP.equals(model)) {
 			
 			this.modelWidth = 673;
 			this.modelHeight = 444;
@@ -354,7 +354,7 @@ public class ModelGridUtil {
 			this.defaultLatInterval = 1d/12d;
 			this.defaultLonInterval = 1d/12d;
 			
-		}  else {
+		} else {
 			throw new IllegalArgumentException("지원하지 않는 모델입니다.");
 		}
 		

@@ -44,7 +44,7 @@ public class KimAcimSectorTableGenerator {
 	
 	private SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	
-	private final String ACIM_PREFIX = "amo_kimg_acim_cnvt_f";
+	private final String ACIM_PREFIX = "amo_gdps_acim_cnvt_f";
 	
 	private final String insertFileProcInfo = 
 			
@@ -103,9 +103,9 @@ public class KimAcimSectorTableGenerator {
 		
 			this.config = configs.properties(new File(DaemonUtils.getConfigFilePath()));
 			
-			storePath = this.config.getString("global.storePath.windows");
+			storePath = this.config.getString("global.storePath.unix");
 			
-			//storePath = "\\\\172.26.56.115\\data_store";
+			//storePath = "\\\\172.26.56.124\\data_store";
 			
 			this.dbManager = DatabaseManager.getInstance();
 			this.dbManager.setConfig(new DaemonSettings(this.config));
@@ -188,9 +188,8 @@ public class KimAcimSectorTableGenerator {
 		
 		try {			
 			//"2026031800"
-			//cal.setTime(new Date());
-			
-			cal.setTime(sdf2.parse("2026031900"));			
+			cal.setTime(new Date());			
+			//cal.setTime(sdf2.parse("2026032412"));			
 			cal.add(Calendar.HOUR_OF_DAY, -9-12);
 			cal.add(Calendar.HOUR_OF_DAY, -cal.get(Calendar.HOUR_OF_DAY)%6); // 6시간 단위로 맞추기 위해 현재 시간을 6시간 단위로 내림 처리
 			// 하루전꺼부터 체크
@@ -375,7 +374,7 @@ public class KimAcimSectorTableGenerator {
 		
 			String latPath = config.getString("kim_gktg.coordinates.lat.path");
 			String lonPath = config.getString("kim_gktg.coordinates.lon.path");
-	
+		
 			ModelGridUtil modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GKTG, ModelGridUtil.Position.MIDDLE_CENTER, latPath, lonPath);
 			modelGridUtil.setMultipleGridBoundInfoforLatLonGrid(50, 20, 110, 150); // 한반도 영역 설정
 			

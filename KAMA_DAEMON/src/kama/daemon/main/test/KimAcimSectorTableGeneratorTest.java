@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -129,22 +130,27 @@ public class KimAcimSectorTableGeneratorTest {
 				}
 			}
 			
-			Collections.sort(modelFileList, (f1, f2) -> {
+			Collections.sort(modelFileList, new Comparator<NetcdfDataset>() {
+
+				@Override
+				public int compare(NetcdfDataset f1, NetcdfDataset f2) {
+					
+					try {
+	                	
+	                	String fcstHour1 = f1.getLocation().substring(f1.getLocation().lastIndexOf("f") + 1, f1.getLocation().lastIndexOf("_"));
+	                	String fcstHour2 = f2.getLocation().substring(f2.getLocation().lastIndexOf("f") + 1, f2.getLocation().lastIndexOf("_"));
+	                	
+						int hour1 = Integer.parseInt(fcstHour1);
+						int hour2 = Integer.parseInt(fcstHour2);
+						return Integer.compare(hour1, hour2); // 오름차순 정렬 
+	                   
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                    return 0;
+	                }
+				}
 				
-                try {
-                	
-                	String fcstHour1 = f1.getLocation().substring(f1.getLocation().lastIndexOf("f") + 1, f1.getLocation().lastIndexOf("_"));
-                	String fcstHour2 = f2.getLocation().substring(f2.getLocation().lastIndexOf("f") + 1, f2.getLocation().lastIndexOf("_"));
-                	
-					int hour1 = Integer.parseInt(fcstHour1);
-					int hour2 = Integer.parseInt(fcstHour2);
-					return Integer.compare(hour1, hour2); // 오름차순 정렬 
-                   
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return 0;
-                }
-            });
+			});
 			
 			return modelFileList;
 			

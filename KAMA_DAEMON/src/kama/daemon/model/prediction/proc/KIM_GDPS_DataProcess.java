@@ -45,7 +45,7 @@ public class KIM_GDPS_DataProcess extends DataProcessor
         super(settings, DATAFILE_PREFIX);
     }
     
-private void sendFileToAcom(List<Map<String, Object>> fileInfoList, ProcessorInfo processorInfo) {
+    private void sendFileToAcom(List<Map<String, Object>> fileInfoList, ProcessorInfo processorInfo) {
     	
     	Log.print("INFO : Start Send Wintem Image Files");
     	

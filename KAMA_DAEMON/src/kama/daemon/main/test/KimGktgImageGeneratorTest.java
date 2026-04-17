@@ -21,7 +21,6 @@ import ucar.nc2.dataset.NetcdfDataset;
 
 public class KimGktgImageGeneratorTest {
 	
-	
 	private ModelGridUtil modelGridUtil;
 	
 	private final int imageExpandFactor = 10;
@@ -39,8 +38,8 @@ public class KimGktgImageGeneratorTest {
 		
 		System.out.println("KimGdpsImageGenerator [ Initailize Coordinate Systems ]");
 		
-		String coordinatesLatPath = "F:/data/datastore/grid/kim_gktg_lat.bin";
-		String coordinatesLonPath = "F:/data/datastore/grid/kim_gktg_lon.bin";
+		String coordinatesLatPath = "C:/data/datastore/grid/kim_gktg_lat.bin";
+		String coordinatesLonPath = "C:/data/datastore/grid/kim_gktg_lon.bin";
 		
 		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GKTG, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath);
 	}
@@ -91,7 +90,7 @@ public class KimGktgImageGeneratorTest {
 			
 			System.out.println("\t-> Process Attribute [GTGMAX]");
 			
-			for(int j=0 ; j<5 ; j++) {
+			for(int j=0 ; j<1 ; j++) {
 					
 				System.out.println("\t\t-> Start Read Variable [GTGMAX]");
 				
@@ -154,8 +153,6 @@ public class KimGktgImageGeneratorTest {
 					}
 				}
 				
-				getCropPosition(boundLonLat, mercatorRatio);
-				
 				bi = Thumbnails.of(bi).imageType(BufferedImage.TYPE_INT_ARGB).size(imgWidth / this.imageResizeFactor, imgHeight / this.imageResizeFactor).asBufferedImage();
 				ImageIO.write(bi, "PNG", imageFile);
 				System.out.println("\t\t-> End Write Image [" + imageFile.getAbsolutePath() + "]");
@@ -168,37 +165,22 @@ public class KimGktgImageGeneratorTest {
 		return boundLonLat;
 	}
 	
-	private void getCropPosition(BoundLonLat boundLonLat, double[] mercatorRatio) {
-		
-		double left = 100+180;
-		double bottom = 11;
-		double right = 157+180;
-		double top = 50.52;
-		
-		int y1 = (int)Math.floor(mercatorRatio[(int)Math.floor((boundLonLat.getTop() - top) * this.imageExpandFactor * this.imageResizeFactor)]);
-		int y2 = (int)Math.floor(mercatorRatio[(int)Math.floor((boundLonLat.getTop() - bottom) * this.imageExpandFactor * this.imageResizeFactor)]);
-		int x1 = (int)Math.floor((left - boundLonLat.getLeft()) * this.imageExpandFactor * this.imageResizeFactor);
-		int x2 = (int)Math.floor((right - boundLonLat.getLeft()) * this.imageExpandFactor * this.imageResizeFactor);
-		
-		System.out.println("Crop Position [x1: " + x1/2 + ", y1: " + y1/2 + ", x2: " + x2/2 + ", y2: " + y2/2 + "]");
-	}
-	
 	public static void main(String[] args) {
         
 		KimGktgImageGeneratorTest kimGktgImageGeneratorTest = new KimGktgImageGeneratorTest();
                   
 		try {
 						
-			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:\\data\\datastore\\KIM_GKTG\\2026\\03\\04\\18\\amo_kimg_gktg_max_f00_2026030418.nc", null);
-			String fileName = "amo_kimg_gktg_max_f00_2026030418.nc";
-	        String savePath = "F:/data";
+			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("\\\\172.26.56.124\\data_store\\KIM_GKTG\\2026\\03\\26\\00\\amo_kimg_gktg_max_f00_2026032600.nc", null);
+			String fileName = "amo_kimg_gktg_max_f00_2026032600.nc";
+	        String savePath = "c:/data";
 	        
 	        kimGktgImageGeneratorTest.generateImages(ncFile, fileName, savePath);
 	        
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 		}
 		
 		

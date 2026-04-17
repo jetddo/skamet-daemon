@@ -24,6 +24,8 @@ public class RDR_EXT_DataProcess extends DataProcessor
     public RDR_EXT_DataProcess(DaemonSettings settings)
     {
         super(settings, DATAFILE_PREFIX);
+        
+        this.insertHistory = false;
     }
 
     /**

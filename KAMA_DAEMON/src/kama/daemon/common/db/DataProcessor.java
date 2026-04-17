@@ -44,6 +44,7 @@ public abstract class DataProcessor
     private String _oldWorkspaceName; // AAMI용 기존 3D 파싱
     private HashMap<Integer, String> _hsQueryFormats;
     protected boolean insertHistory = true;
+    protected boolean insertRealTable = false;
     /**
      * 클래스 생성자
      * @param settings 설정값
@@ -283,6 +284,8 @@ public abstract class DataProcessor
                     try
                     {
                         Date dtFileDateChild = parseDateFromFileName(dataFiles[0]);
+                     
+                        processorInfo = createBasicProcessorInfo(processorInfo, dtFileDateChild);
                     }
                     catch (ParseException pe)
                     {
@@ -426,7 +429,7 @@ public abstract class DataProcessor
         DatabaseManager dbManager;
 
         dbManager = openDBManager();
-        dbManager.executeUpdate("DELETE FROM AAMI_TEST.DMON_FILE_PROC_H WHERE FILE_STR_LOC NOT LIKE '/%'");
+        dbManager.executeUpdate("DELETE FROM " + this.getDatabaseOwner() + ".DMON_FILE_PROC_H WHERE FILE_STR_LOC NOT LIKE '/%'");
         dbManager.commit();
 
         if (dbManager != null)
@@ -456,7 +459,7 @@ public abstract class DataProcessor
             throw new DaemonException("Error : the copied file does not exist.");
         }
 
-        sb.append("INSERT INTO AAMI_TEST.DMON_FILE_PROC_H(DH_SEQ, FILE_DT, FILE_STR_LOC, FILE_CD, PROC_DT) ");
+        sb.append("INSERT INTO " + this.getDatabaseOwner() + ".DMON_FILE_PROC_H(DH_SEQ, FILE_DT, FILE_STR_LOC, FILE_CD, PROC_DT) ");
         sb.append("VALUES (AAMI.DMON_FILE_PROC_H_SEQ.NEXTVAL, TO_DATE('"+convertToDBText(processorInfo.FileDateFromNameOriginal)+"', 'YYYY-MM-DD HH24:mi:ss'), '");
         sb.append(newFile.getAbsolutePath()+"', '"+processorInfo.FileType+"', sysdate)");
 
@@ -613,4 +616,13 @@ public abstract class DataProcessor
             throw new RuntimeException("Conversion not supported.");
         }
     }
+    
+    protected String getDatabaseOwner() {
+    	if(this.insertRealTable) {
+    		return "AAMI";
+    	} else {
+    		return "AAMI_TEST";
+    	}
+    }
+    
 }
