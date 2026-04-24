@@ -1,0 +1,145 @@
+=================================================================================================
+Basic reference data for contours of line 
+ NAME LWTI LWTH INTV      BASE      BMIN      BMAX SMBL PTLN CRLN CRMX CRMN  REFERENCE
+1---5---10----5 --20----5---30----5---40----5---50----5---60----5---70----5---80----5---90----5--  
+-------------------------------------------------------------------------------------------------
+AMSL1 2. 2. 1.0   1.      -10.      -10.        0.   0.   1.   4.  -1.  -9.  ANOMALY MSLP(hPa/24hr)
+AMSL2 2. 2. 1.0   1.        0.        0.       10.   0.   1.   2.  -9.  -1.  ANOMALY MSLP(hPa/24hr)
+TOPO1 3. 3. 2.0 100.        0.        0.     3000.   0.   1.   2.  -1.  -1.  TOPO GRAPHICS(m)
+TOPO2 4. 4. 2.0 200.        0.        0.     3000.   0.   1.   2.  -1.  -1.  TOPO GRAPHICS(m)
+RAIN1 1. 1. 0.5  50.       50.       50.      300.   0.   1.   1.   1.  -9.  Rain Amount
+RAIN2 1. 1. 0.5 100.      100.      100.      200.   0.   1.   1.   1.  -9.  Rain Amount
+RAIN3 1. 1. 1.0   5.        0.        0.      300.   0.   1.  14.  -9.  -9.  Rain Amount
+RAIN4 1. 1. 1.0   5.        0.        0.      300.   0.   1.   3.  -9.  -9.  Rain Amount
+SNOW1 1. 1. 0.5  50.        0.        0.      100.   0.   1.   1.   1.  -9.  QSN:Snow M/R(g/kg)
+SNOW2 5. 1. 0.5   5.        0.        0.      100.   0.   1.   2.   4.  -9.  QSN:Snow M/R(g/kg)
+SNOW3 5. 1. 0.5   5.        0.        0.      100.   0.   1.  14.   1.  -9.  QSN:Snow M/R(g/kg)
+SNOW4 5. 1. 0.5   5.        0.        0.      100.   0.   1.   4.   1.  -9.  QSN:Snow M/R(g/kg)
+SRAT1 2. 1. 1.5  10.        0.        0.      100.   0.   1.   2.   4.  -9.  SR Snow Amount(cm)
+MSLP1 4. 2. 2.0   1.     1000.      940.     1060.   1.   1.   1.   4.   2.  Mslp(Asia)
+MSLP2 4. 2. 2.0   1.     1000.      940.     1060.   1.   1.   4.   4.   2.  Mslp(Koera)
+MSLP3 4. 2. 2.0   1.     1000.      940.     1060.   1.   1.   4.   1.   2.  Mslp(Asia,overlay)
+MSLP4 1. 1. 2.0   2.     1000.      940.     1060.   1.   1.   1.   4.   2.  Mslp(Asia)
+MSLP5 1. 1. 2.0   1.     1000.      940.     1060.   1.   1.   1.   4.   2.  Mslp(Koera)
+MSLP6 1. 1. 2.0   4.     1000.      940.     1060.   1.   1.   4.   1.   2.  Mslp(Asia,overlay)
+MSLP7 1. 1. 2.0   1.     1200.      940.     1060.   1.   1.   4.  -1.  -1.  Mslp(Asia,overlay)
+MIXR1 1. 2. 0.5   2.       10.       10.       24.   0.   1.   1.  -1.  -1.  Mixing Ratio
+MIXR2 1. 2. 0.5   2.       10.       10.       24.   0.   1.   1.  -1.  -1.  Mixing Ratio(950hPa)
+TPWA0 4. 2. 1.0   5.        0.        0.      110.   0.   1.   2.   2.   1.  Precipitable Water
+TPWA1 2. 1. 1.0  10.       50.        0.      110.   0.   1.   2.  -1.  -1.  Precipitable Water
+TEMP1 4. 1. 2.0   1.        0.      -60.       60.   2.   1.   2.   2.   4.  Temperture(3C)
+TEMP2 4. 2. 2.0   1.        0.      -60.       60.   2.   1.   2.   2.  16.  Temperture(3C,overlay)
+TEMP3 4. 2. 2.0   3.        0.      -60.       60.   2.   1.   2.   2.   4.  Temperture(5C)
+TEMP4 4. 2. 2.0   3.        0.      -60.       60.   2.   1.   2.   2.  16.  Temperture(5C,overlay)
+TEMP5 1. 1. 2.0   3.        0.      -60.       60.   2.   1.   2.   2.   4.  Temperture(3C)
+TEMP6 1. 1. 2.0   5.        0.      -60.       60.   2.   1.   2.   2.   4.  Temperture(5C)
+EPTM1 1. 2. 3.0   3.      333.      273.      393.   2.   1.   2.  -1.  -1.  Eq Pot. Temp(850hPa)
+EPTM2 1. 1. 0.5   3.      333.      273.      393.   2.   1.   1.  -1.  -1.  Eq Pot. Temp(700hPa)
+EPTM3 1. 1. 0.5   6.      333.      273.      393.   2.   1.   1.  -1.  -1.  Eq Pot. Temp(850hPa)
+EPTM4 1. 1. 0.5  10.      320.      270.      393.   2.   1.   1.  -1.  -1.  Eq Pot. Temp(700hPa)
+EPTM5 4. 1. 0.5   6.      270.      270.      393.   2.   1.   2.  -1.  -1.  Eq Pot. Temp(new)
+VORT1 1. 2. 0.5  20.        0.      -20.       32.   0.   1.   1.   1.   1.  Vorticity(500hPa)
+AGPH1 1. 1. 0.5  20.        0.     -200.      200.   0.   1.   1.   2.   4.  ANOMALY GPH(500hPa)
+ATMP1 1. 1. 0.5   2.        0.      -20.       20.   0.   1.   1.   2.   4.  ANOMALY TMP(850hPa)
+AGPH2 1. 1. 0.5  40.        0.     -400.      400.   0.   1.   1.   2.   4.  ANOMALY GPH(500hPa)
+ATMP2 1. 1. 0.5   4.        0.      -40.       40.   0.   1.   1.   2.   4.  ANOMALY TMP(850hPa)
+ADTH1 1. 1. 0.5  30.        0.     -300.      300.   0.   1.   1.   2.   4.  ADV_THICKNESS(850hPa)
+ADTH2 1. 1. 0.5  30.        0.     -300.      300.   0.   1.   1.   4.   2.  ADV_THICKNESS(850hPa)
+ADVT1 1. 1. 0.5   5.        0.        0.      400.   1.   1.   1.  -9.  -9.  ADV_VORTICITY(500hPa)
+ADVT2 1. 1. 0.5  10.        0.        0.      800.   1.   1.   1.  -9.  -9.  ADV_VORTICITY(500hPa)
+GPH01 4. 2. 2.0  30.      810.      510.     1100.   1.   1.   4.   1.  16.  GPH(925hPa)
+GPH02 4. 2. 2.0  15.     1500.     1000.     2000.   1.   1.   4.   1.  16.  GPH(850hPa)
+GPH03 4. 2. 2.0  15.     3000.     2400.     3600.   1.   1.   4.   1.  16.  GPH(700hPa)
+GPH04 4. 2. 2.0  15.     5580.     4980.     6180.   1.   1.   4.   1.  16.  GPH(500hPa)
+GPH05 4. 2. 2.0  30.     9000.     7800.    10200.   1.   1.   4.   1.  16.  GPH(300hPa)
+GPH06 4. 2. 2.0  30.    12000.    10800.    13200.   1.   1.   4.   4.   2.  GPH(200hPa)
+GPH07 4. 2. 2.0  60.    12000.     7800.    13200.   1.   1.   4.   1.  16.  GPH(200/300hPa)
+GPH08 1. 1. 2.0  30.      810.      510.     1100.   1.   1.   4.   1.  16.  GPH(925hPa)
+GPH09 1. 1. 2.0  15.     1500.     1000.     2000.   1.   1.   4.   1.  16.  GPH(850hPa)
+GPH10 1. 1. 2.0  15.     3000.     2400.     3600.   1.   1.   4.   1.  16.  GPH(700hPa)
+GPH11 1. 1. 2.0  30.     5580.     4980.     6180.   1.   1.   4.   1.  16.  GPH(500hPa)
+GPH12 1. 1. 2.0  60.     9000.     7800.    10200.   1.   1.   4.   1.  16.  GPH(300hPa)
+GPH13 1. 1. 2.0  60.    12000.    10800.    13200.   1.   1.   4.   1.  16.  GPH(200hPa)
+GPH14 1. 1. 2.0  60.    12000.     7800.    13200.   1.   1.   4.   1.  16.  GPH(200/300hPa)
+GPH95 4. 2. 2.0  15.      510.      210.      800.   1.   1.   4.   1.  16.  GPH(950hPa)
+THCK1 1. 1. 2.0  15.     3000.     2100.     3600.   1.   1.   4.   1.  16.  Thickness(1000-700hPa)
+THCK2 1. 1. 1.0  60.     5580.     4800.     6180.   1.   1.   4.   4.   2.  Thickness(1000-500hPa)
+THCK3 4. 2. 2.0  15.     3000.     2100.     3600.   1.   1.   4.   1.  16.  Thickness(1000-700hPa)
+THCK4 4. 2. 2.0  60.     5580.     4800.     6180.   1.   1.   4.   1.  16.  Thickness(1000-500hPa)
+THCK5 1. 1. 2.0  60.     2760.     2760.     2820.   1.   1.   3.  -1.  -1.  Thickness(1000-700hPa)
+THCK6 4. 2. 2.0  30.     1500.      900.     2100.   1.   1.   1.   4.   2.  Thickness(1000-850hPa)
+THCK7 4. 2. 2.0  15.     1500.      900.     2100.   1.   1.   1.   4.   2.  Thickness(1000-850hPa)
+THK8B 1. 1. 2.0  16.     1281.     1281.     1281.   1.   1.   4.  -1.  -1.  Thickness(1000-850hPa)
+THK8C 1. 1. 0.5  16.     1281.     1281.     1297.   1.   1.   4.  -1.  -1.  Thickness(1000-850hPa)
+THK8T 1. 1. 2.0  16.     1297.     1297.     1297.   1.   1.   4.  -1.  -1.  Thickness(1000-850hPa)
+THK7B 1. 1. 2.5  60.     2760.     2760.     2760.   1.   1.   2.  -1.  -1.  Thickness(1000-700hPa)
+THK7C 1. 1. 0.5  60.     2760.     2760.     2820.   1.   1.   2.  -1.  -1.  Thickness(1000-700hPa)
+THK7T 1. 1. 2.5  60.     2820.     2820.     2820.   1.   1.   2.  -1.  -1.  Thickness(1000-700hPa)
+TMTD1 1. 1. 0.5   4.        0.        0.       12.   3.   1.   1.  -9.  -9.  T-Td(700hPa)
+TMTD2 1. 1. 1.0   4.        0.        0.       12.   3.   1.   2.   4.   2.  T-Td(700hPa)
+DIVG1 1. 1. 0.5  10.        0.      -50.       50.   0.   1.   1.  -9.  -9.  Divergence(200hPa)
+DIVG2 1. 1. 0.5  20.        0.     -100.      100.   0.   1.   1.  -9.  -9.  Divergence(200hPa)
+COVG1 1. 1. 0.5  10.        0.      -50.       20.   0.   1.   1.  -9.  -9.  Convergence(850hPa)
+COVG2 1. 1. 0.5  20.        0.     -100.      100.   0.   1.   1.  -9.  -9.  Convergence(850hPa)
+MCVG1 1. 1. 0.5  10.        0.      -90.        0.   0.   1.   7.  -9.  -9.  Moisture Conv(850hPa)
+KIDX1 1. 1. 0.5   5.       25.        0.       70.   0.   1.   1.   2.   4.  K-Index
+SSIX1 1. 1. 0.5   3.        3.       -9.        9.   0.   1.   1.   4.   2.  Showalter S Index
+LIDX1 1. 1. 0.5   3.        0.       -9.        9.   0.   1.   1.   4.   2.  Lifted Index
+WSPD1 1. 1. 2.0  25.       50.       25.      100.   0.   1.   2.  -1.  -1.  Windspeed(850/700hPa)
+WSPD2 1. 1. 2.0  25.      100.       50.      200.   0.   1.   2.  -1.  -1.  Windspeed(500/200hPa)
+WSPD3 1. 1. 0.5  25.       50.       25.      100.   0.   1.   1.  -1.  -1.  Windspeed(850/700hPa)
+WSPD4 1. 1. 0.5  25.      100.       50.      200.   0.   1.   1.  -1.  -1.  Windspeed(500/200hPa)
+VVEL1 1. 1. 0.5  60.        0.     -400.       20.   0.   1.   1.  -9.  -9.  Vert.Velocity(700hPa)
+FRGN1 1. 1. 0.5   2.       -1.       -1.        1.   0.   1.   7.  -9.  -9.  Frontogenesis Param.
+DIVQ1 1. 1. 0.5   4.       -2.      -20.       20.   0.   1.   7.  -9.  -9.  Frontogenesis Param.
+MSLPC 4. 2. 2.0   4.     1000.      940.     1060.   1.   1.   7.   7.   7.  Mslp(Asia,overlay)
+MSLPO 4. 2. 2.0   4.     1000.      940.     1060.   1.   1.   1.   4.   2.  Mslp(Asia)
+TEMPC 4. 2. 2.0   3.        0.      -60.       60.   2.   1.   7.   7.   7.  Temperture(3C)
+GPHC2 4. 2. 2.0  30.     1500.     1000.     2000.   1.   1.   7.   7.   7.  GPH(850hPa)
+GPHO2 4. 2. 2.0  30.     1500.     1000.     2000.   1.   1.   4.   1.  56.  GPH(850hPa)
+GPHO1 4. 2. 2.0  60.     5580.     4980.     6180.   1.   1.   4.   1.  56.  GPH(500hPa)
+GPHC1 4. 2. 2.0  60.     5580.     4980.     6180.   1.   1.   7.   7.   7.  GPH(500hPa)
+TMP90 3. 1. 2.0   3.        0.      -30.       30.   2.   1.   4.   4.  -9.  Temperture(C,900hPa)
+TMP90 4. 2. 2.0   3.        0.       -9.        3.   2.   1.   2.  -1.  -1.  Temperture(C,900hPa)
+GTMP1 4. 1. 2.0   1.      -40.      -40.       40.   0.   1.   2.   4.   4.  Temperture(C,ground)
+CINE1 1. 1. 2.0 100.      100.      100.      600.   0.   1.   4.   4.  -9.  Convective INE(J/.kg)
+CAPE1 4. 1. 1.0 400.      200.      200.     4000.   0.   1.   1.  -9.  -9.  Convective APE(J/.kg)
+CAPE2 4. 2. 2.0 200.      900.      100.     2100.   0.   1.   1.   2.  -1.  Convective APE(J/.kg)
+TPWA2 2. 1. 0.5  10.       30.       30.      100.   0.   1.   3.  -9.  -9.  Total PWA(g/kg)
+PVOR1 4. 2. 2.0   2.        4.        4.       24.   0.   1.   1.   4.  -9.  Potential Vort(500hPa)
+TTIX1 2. 1. 0.5   4.       38.       38.       66.   0.   1.   1.   4.  -9.  Total-total Index
+GUST1 1. 1. 2.0  30.       14.       14.       44.   0.   1.   4.  -1.  -1.  GUST1(m/s)
+GUST2 1. 1. 2.0  30.       21.       21.       51.   0.   1.   4.  -1.  -1.  GUST2(m/s)
+GUST3 1. 1. 2.0  30.       20.       20.       50.   0.   1.  18.  -1.  -1.  GUST1(kts)
+GUST4 1. 1. 2.0  30.       26.       26.       56.   0.   1.  18.  -1.  -1.  GUST2(kts)
+GUST5 1. 1. 2.0  10.        5.        5.       15.   0.   1.   4.  -1.  -1.  GUST5(kts) for test
+GUST6 1. 1. 2.0  10.       10.       10.       20.   0.   1.   4.  -1.  -1.  GUST6(kts) for test
+NGST1 2. 2. 2.0  3.5        0.        0.       49.   0.   1.   4.  -1.  -1.  GUST1(m/s)
+NGST2 1. 1. 2.0  30.       21.       21.       51.   0.   1.   4.  -1.  -1.  GUST2(m/s)
+NGST3 2. 2. 2.0   3.        2.        2.       50.   0.   1.  18.  -1.  -1.  GUST1(kts)
+NGST4 1. 1. 2.0  30.       26.       26.       56.   0.   1.  18.  -1.  -1.  GUST2(kts)
+HLCT1 4. 1. 0.5 100.        0.      100.     1000.   0.   1.   1.   2.  -9.  Storm-Rel.-Helicity(m2/s2)
+DFPP1 1. 1. 1.5   1.        5.        5.       15.   0.   1.   3.  -9.  -9.  MSLP Tendency(hPa/hr)
+DFPM1 1. 1. 1.5   1.       -5.      -15.       -5.   0.   1.   2.  -9.  -9.  MSLP Tendency(hPa/hr)
+PBLHT 1. 1. 0.5 200.        0.      200.     3000.   0.   1.   1.   2.   4.  PBL Height(m)
+FVIS1 1. 1. 2.0   1.        1.        1.        1.   0.   1.   2.  -9.   1.  FOG(Visibility, m)
+FVIS2 1. 1. 2.0   5.        5.        5.        5.   0.   1.   1.  -9.   1.  FOG(Visibility, m)
+FVIS3 1. 1. 1.0  10.       10.       10.       30.   0.   1.   1.  -9.   1.  FOG(Visibility, m)
+FRAC1 1. 1. 2.0  25.       25.       25.      100.   0.   1.   1.   1.  -9.  FOG FRACTION(%)
+FRAC2 1. 1. 1.0  10.        0.        0.      100.   0.   1.   1.   1.  -9.  FOG FRACTION(%)
+=================================================================================================
+(Introductory Remarks)
+-------------------------------------------------------------------------------------------------
+NAME    1: Variables for contouring
+LWTI  2-3: Interval of continuous thick Line and putting label on contour line
+LWTH    4: Thickness of contour line
+INTV    5: Interval of contour lines
+BASE    6: Basic reference Value for contour
+BMIN    7: Min value for contouring is based BASE(BASE - n*INTV)
+BMAX    8: Max value for contouring is based BASE(BASE + n*INTV)
+SMBL    9: Max/Min Value Symbol(0:+/-,1:H/L,2:W/C,3:D:M)(ex: High,Low,Warm,Cold,Dry,Moisture)
+PTLN   10: Pattern of contour line(1:solid, 0:dash)
+CRLN   11: Color of contour line(0:white,1:black,2:red,3:green,4:blue,see subroute make_gscrtbl)
+CRMX   12: Color of Max value(0:W,1:Bl,2:R,3:G,4:B,negative(-): no labling(-9),and no plotting)
+CRMN   13: Color of Max value(0:W,1:Bl,2:R,3:G,4:B,negative(-): no labling(-9),and no plotting)
+=================================================================================================
