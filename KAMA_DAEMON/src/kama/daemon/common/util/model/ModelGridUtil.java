@@ -48,7 +48,20 @@ public class ModelGridUtil {
 		HOBS_RKNY,
 		KIM_GKTG,
 		KIM_KTG,
-		KIM_KFIP
+		KIM_KFIP,
+		KLDW_RKJB,
+		KLDW_RKJY,
+		KLDW_RKNY,
+		KLDW_RKPC,
+		KLDW_RKPK,
+		KLDW_RKPS,
+		KLDW_RKPU,
+		KLDW_RKSI,
+		KLDW_RKSS,
+		KLDW_RKTH,
+		KLDW_RKTN,
+		KLDW_RKTU,
+		KLDW_RKJJ
 	}
 	
 	// 격자 기준 좌표 위치
@@ -353,6 +366,97 @@ public class ModelGridUtil {
 			
 			this.defaultLatInterval = 1d/12d;
 			this.defaultLonInterval = 1d/12d;
+			
+		} else if(Model.KLDW_RKJB.equals(model)) {
+			
+			this.modelWidth = 34;
+			this.modelHeight = 34;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKJY.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKNY.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKPC.equals(model)) {
+			
+			this.modelWidth = 35;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKPK.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKPS.equals(model)) {
+			
+			this.modelWidth = 34;
+			this.modelHeight = 34;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKPU.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 36;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKSI.equals(model)) {
+			
+			this.modelWidth = 34;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKSS.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKTH.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 36;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKTN.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 36;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKTU.equals(model)) {
+			
+			this.modelWidth = 33;
+			this.modelHeight = 123;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KLDW_RKJJ.equals(model)) {
+			
+			this.modelWidth = 35;
+			this.modelHeight = 35;
+				
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
 			
 		} else {
 			throw new IllegalArgumentException("지원하지 않는 모델입니다.");

@@ -382,6 +382,9 @@ public class MakeKimKfipImage {
 				bi = Thumbnails.of(bi).imageType(BufferedImage.TYPE_INT_ARGB).size(imgWidth / this.imageResizeFactor, imgHeight / this.imageResizeFactor).asBufferedImage();
 				ImageIO.write(bi, "PNG", imageFile);
 				System.out.println("\t\t-> End Write Image [" + imageFile.getAbsolutePath() + "]");
+				
+                ig2.dispose();
+                ig2 = null;
 			}
 		
 		} catch (Exception e) {

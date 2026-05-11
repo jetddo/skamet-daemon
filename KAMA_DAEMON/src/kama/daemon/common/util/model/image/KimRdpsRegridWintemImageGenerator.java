@@ -396,6 +396,9 @@ public class KimRdpsRegridWintemImageGenerator {
 				
 				System.out.println("\t\t-> End Write Image [" + imageFile.getAbsolutePath() + "]");
 				
+				ig2.dispose();
+				ig2 = null;
+				
 				///////////////////////////////////////////////////////////////////////////////////
 				
 				System.out.println();
@@ -521,6 +524,8 @@ public class KimRdpsRegridWintemImageGenerator {
 		ig2.drawString("Units: Wind(knots), Temperature(℃)", wintemBaseImg.getWidth() - labelWidth + fontLeftMargin, wintemBaseImg.getHeight() - labelHeight + labelTopMargin + lineHeight*6);		
 		ig2.drawString("Temperatures are negative unless prefixed by PS", wintemBaseImg.getWidth() - labelWidth + fontLeftMargin, wintemBaseImg.getHeight() - labelHeight + labelTopMargin/2 + lineHeight*7);
 		
+		ig2.dispose();
+		ig2 = null;
 	}
 	
 	private BufferedImage cropImage(BufferedImage bi, BoundLonLat boundLonLat, double[] mercatorRatio, double top, double bottom, double left, double right) {
