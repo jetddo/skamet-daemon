@@ -272,6 +272,8 @@ public class MakeKimKtgImage {
 				this.dbManager.executeQuery(query);
 				this.dbManager.commit();
 				
+				ncFile.close();
+				
 			} catch (Exception e) {
 				
 			}

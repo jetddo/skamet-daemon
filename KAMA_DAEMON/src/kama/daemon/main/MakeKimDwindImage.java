@@ -319,6 +319,8 @@ public class MakeKimDwindImage {
 		        	this.dbManager.rollback();
 		        }
 				
+				ncFile.close();
+				
 			} catch (Exception e) {
 				
 			}

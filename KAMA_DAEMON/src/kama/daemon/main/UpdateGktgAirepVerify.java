@@ -61,10 +61,10 @@ public class UpdateGktgAirepVerify {
 		
 			this.config = configs.properties(new File(DaemonUtils.getConfigFilePath()));
 			
-			String coordinatesLatPath = this.config.getString("gktg.coordinates.lat.path");
-			String coordinatesLonPath = this.config.getString("gktg.coordinates.lon.path");
+			String coordinatesLatPath = this.config.getString("kim_gktg.coordinates.lat.path");
+			String coordinatesLonPath = this.config.getString("kim_gktg.coordinates.lon.path");
 			
-			modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.GDPS, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath, 180);
+			modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GDPS, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath, 180);
 			
 			this.dbManager = DatabaseManager.getInstance();
 			this.dbManager.setConfig(new DaemonSettings(this.config));
@@ -104,7 +104,9 @@ public class UpdateGktgAirepVerify {
 		String storePath = DaemonUtils.isWindow() ? this.config.getString("global.storePath.windows") 
 												  : this.config.getString("global.storePath.unix");
 		
-		storePath = storePath + File.separator + "GKTG";
+		//storePath = "//172.26.56.115/data_store/";
+		
+		storePath = storePath + File.separator + "KIM_GKTG";
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		
@@ -127,6 +129,10 @@ public class UpdateGktgAirepVerify {
 				String lngt = (String)airepData.get("lngt");
 				int flightLevel = Integer.valueOf((String)airepData.get("flightLevel"));
 				String turb = (String)airepData.get("turb");
+				
+				if(flightLevel == 999) {
+					continue;
+				}
 				
 				//UTC 로 변환하자
 				
@@ -234,7 +240,7 @@ public class UpdateGktgAirepVerify {
 							@Override
 							public boolean accept(File dir, String name) {
 								
-								if(name.matches("amo_gdum_gktg_max_f[0-9]{2}_[0-9]{10}.nc")) {
+								if(name.matches("amo_gdps_gktg_max_f[0-9]{2}_[0-9]{10}.nc")) {
 									return true;
 								}
 								

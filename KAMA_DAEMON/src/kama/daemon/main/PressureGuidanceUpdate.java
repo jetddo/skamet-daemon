@@ -301,6 +301,7 @@ public class PressureGuidanceUpdate {
 			
 			for(int i = 0, sz=list.size(); i < sz; i++) {
 				Object[] item = list.get(i);
+				
 				query = "UPDATE AMIS.FCT_PRESSURE SET "
 						+ " AMOS_NOW=" + item[3]
 						// + " WHERE FCT_TM=TO_DATE('" + fctTmFormat.format(fctTm) + "', 'yyyyMMddHH24mi') "
@@ -309,6 +310,8 @@ public class PressureGuidanceUpdate {
 						+ " AND STN_ID=" + item[1] + " ";
 				
 				sql.add(query);
+				
+				System.out.println(query);
 			}
 			
 			updateQuery(false, sql);

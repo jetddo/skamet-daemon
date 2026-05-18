@@ -145,4 +145,109 @@ public class GridCalcUtil {
 		
 		return values;
     }
+	
+	public static float[][] convertStorageToPrimitiveValues(Object storage, int rows, int cols) {
+    	
+    	float[][] values = new float[rows][cols];
+    	
+    	if(storage instanceof float[]) {
+    		
+    		for(int i=0 ; i<rows ; i++) {
+    			for(int j=0 ; j<cols ; j++) {
+    				
+    				Float f = ((float[])storage)[i*cols + j];
+    				
+    				if(!f.isNaN()) {
+    					values[i][j] = f;	
+    				} else {
+    					values[i][j] = -999.0f;
+    				}
+    			}
+    		}	
+    		
+    	} else if(storage instanceof double[]) {
+    		
+    		for(int i=0 ; i<rows ; i++) {
+    			for(int j=0 ; j<cols ; j++) {
+    				
+    				Float f = (float)((double[])storage)[i*cols + j];
+    				
+    				if(!f.isNaN()) {
+    					values[i][j] = f;	
+    				} else {
+    					values[i][j] = -999.0f;
+    				}
+    			}
+    		}	
+    		
+    	} else if(storage instanceof short[]) {
+    		
+    		for(int i=0 ; i<rows ; i++) {
+    			for(int j=0 ; j<cols ; j++) {
+    				
+    				Float f = (float)((short[])storage)[i*cols + j];
+    				
+    				if(!f.isNaN()) {
+    					values[i][j] = f;	
+    				} else {
+    					values[i][j] = -999.0f;
+    				}
+    			}
+    		}
+    	}
+		
+		return values;
+    }
+	
+	public static float[][] convertStorageToPrimitiveValuesReverse(Object storage, int rows, int cols) {
+    	
+    	float[][] values = new float[rows][cols];
+    	
+    	if(storage instanceof float[]) {
+    		
+    		for(int i=0 ; i<rows ; i++) {
+    			for(int j=0 ; j<cols ; j++) {
+    				
+    				Float f = ((float[])storage)[i*cols + j];
+    				
+    				if(!f.isNaN()) {
+    					values[rows-i-1][j] = f;	
+    				} else {
+    					values[rows-i-1][j] = -999.0f;
+    				}
+    			}
+    		}	
+    		
+    	} else if(storage instanceof double[]) {
+    		
+    		for(int i=0 ; i<rows ; i++) {
+    			for(int j=0 ; j<cols ; j++) {
+    				
+    				Float f = (float)((double[])storage)[i*cols + j];
+    				
+    				if(!f.isNaN()) {
+    					values[rows-i-1][j] = f;	
+    				} else {
+    					values[rows-i-1][j] = -999.0f;
+    				}
+    			}
+    		}	
+    	} else if(storage instanceof double[]) {
+    		
+    		for(int i=0 ; i<rows ; i++) {
+    			for(int j=0 ; j<cols ; j++) {
+    				
+    				Float f = (float)((short[])storage)[i*cols + j];
+    				
+    				if(!f.isNaN()) {
+    					values[rows-i-1][j] = f;	
+    				} else {
+    					values[rows-i-1][j] = -999.0f;
+    				}
+    			}
+    		}	
+    	}
+		
+		return values;
+    }
 }

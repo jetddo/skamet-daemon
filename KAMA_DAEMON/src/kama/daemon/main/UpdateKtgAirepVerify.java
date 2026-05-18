@@ -62,10 +62,10 @@ public class UpdateKtgAirepVerify {
 		
 			this.config = configs.properties(new File(DaemonUtils.getConfigFilePath()));
 			
-			String coordinatesLatPath = this.config.getString("ktg.coordinates.lat.path");
-			String coordinatesLonPath = this.config.getString("ktg.coordinates.lon.path");
+			String coordinatesLatPath = this.config.getString("kim_ktg.coordinates.lat.path");
+			String coordinatesLonPath = this.config.getString("kim_ktg.coordinates.lon.path");
 			
-			modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KTG, null, coordinatesLatPath, coordinatesLonPath);
+			modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_KTG, null, coordinatesLatPath, coordinatesLonPath);
 			
 			this.dbManager = DatabaseManager.getInstance();
 			this.dbManager.setConfig(new DaemonSettings(this.config));
@@ -107,7 +107,7 @@ public class UpdateKtgAirepVerify {
 		
 		//storePath = "//172.26.56.115/data_store/"; 
 		
-		storePath = storePath + File.separator + "KTG";
+		storePath = storePath + File.separator + "KIM_KTG";
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		
@@ -130,6 +130,10 @@ public class UpdateKtgAirepVerify {
 				String lngt = (String)airepData.get("lngt");
 				int flightLevel = Integer.valueOf((String)airepData.get("flightLevel"));
 				String turb = (String)airepData.get("turb");
+				
+				if(flightLevel == 999) {
+					continue;
+				}
 				
 				//UTC 로 변환하자
 				
@@ -263,7 +267,7 @@ public class UpdateKtgAirepVerify {
 							@Override
 							public boolean accept(File dir, String name) {
 								
-								if(name.matches("amo_gdum_ktgm_midl_f[0-9]{2}_[0-9]{10}.nc")) {
+								if(name.matches("amo_gdps_ktgm_midl_f[0-9]{2}_[0-9]{10}.nc")) {
 									return true;
 								}
 								

@@ -273,6 +273,8 @@ public class MakeKimKfipImage {
 				
 				this.dbManager.executeQuery(query);
 				this.dbManager.commit();
+								
+				ncFile.close();
 				
 			} catch (Exception e) {
 				e.printStackTrace();
