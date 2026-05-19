@@ -42,6 +42,7 @@ public class ModelGridUtil {
 		KMAPP_YEOSU,
 		KIM_GDPS,
 		KIM_RDPS,
+		KIM_RDPS_NE57,
 		GKTG_ARCV,
 		HOBS_RKSI,
 		HOBS_RKPC,
@@ -306,6 +307,13 @@ public class ModelGridUtil {
 			
 			this.modelWidth = 1049;
 			this.modelHeight = 839;
+	
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KIM_RDPS_NE57.equals(model)) {
+			
+			this.modelWidth = 1050;
+			this.modelHeight = 840;
 	
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 			

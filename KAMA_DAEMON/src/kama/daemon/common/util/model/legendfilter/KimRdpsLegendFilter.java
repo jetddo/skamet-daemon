@@ -43,4 +43,36 @@ public class KimRdpsLegendFilter {
 		
 		return null;
 	}
+	
+
+	public Color getColor_Relative_humidity_isobaric(double v) {
+		
+		if(Double.isNaN(v)) {
+			return null;
+		}
+		
+		if(v >= 0 && v < 10) {
+			return new Color(165, 0, 38);      // 매우 건조 - 진한 빨강
+		} else if(v >= 10 && v < 20) {
+			return new Color(215, 48, 39);
+		} else if(v >= 20 && v < 30) {
+			return new Color(244, 109, 67);
+		} else if(v >= 30 && v < 40) {
+			return new Color(253, 174, 97);
+		} else if(v >= 40 && v < 50) {
+			return new Color(254, 224, 144);
+		} else if(v >= 50 && v < 60) {
+			return new Color(224, 243, 248);   // 적정 습도
+		} else if(v >= 60 && v < 70) {
+			return new Color(171, 217, 233);
+		} else if(v >= 70 && v < 80) {
+			return new Color(116, 173, 209);
+		} else if(v >= 80 && v < 90) {
+			return new Color(69, 117, 180);
+		} else if(v >= 90 && v <= 100) {
+			return new Color(49, 54, 149);     // 매우 습함 - 진한 파랑
+		}
+		
+		return null;
+	}
 }

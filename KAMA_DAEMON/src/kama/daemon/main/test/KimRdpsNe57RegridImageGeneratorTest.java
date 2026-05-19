@@ -3,7 +3,11 @@ package kama.daemon.main.test;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.LineNumberReader;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +16,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import kama.daemon.common.util.DaemonSettings;
 import kama.daemon.common.util.model.BoundLonLat;
 import kama.daemon.common.util.model.BoundXY;
 import kama.daemon.common.util.model.GridCalcUtil;
@@ -22,7 +27,7 @@ import ucar.ma2.Range;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
-public class KimRdpsRegridImageGeneratorTest {
+public class KimRdpsNe57RegridImageGeneratorTest {
 	
 	
 	private ModelGridUtil modelGridUtil;
@@ -30,28 +35,61 @@ public class KimRdpsRegridImageGeneratorTest {
 	private final int imageExpandFactor = 50;
 	private final int imageResizeFactor = 2;
 	
-	private String varName = "Relative_humidity_isobaric";
+	private String varName = "RH";
+	
+	private Map<String, String> regridInfo = null;
 	
 	private FloatBuffer latitudeBuffer;
 	private FloatBuffer longitudeBuffer;
 	
-	public KimRdpsRegridImageGeneratorTest() {
+	public KimRdpsNe57RegridImageGeneratorTest() {
 		
 			
 		this.initCoordinates();
+		
+		this.readRegridInfo();
 	}
 
 	private void initCoordinates() {
 		
 		System.out.println("KimRdpsImageGenerator [ Initailize Coordinate Systems ]");
 		
-		String coordinatesLatPath = "F:/data/datastore/grid/kim_rdps_lat.bin";
-		String coordinatesLonPath = "F:/data/datastore/grid/kim_rdps_lon.bin";
+		String coordinatesLatPath = "F:/data/datastore/grid/kim_rdps_ne57_lat.bin";
+		String coordinatesLonPath = "F:/data/datastore/grid/kim_rdps_ne57_lon.bin";
 		
-		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_RDPS, null, coordinatesLatPath, coordinatesLonPath);
+		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_RDPS_NE57, null, coordinatesLatPath, coordinatesLonPath);
 				
 		this.latitudeBuffer = modelGridUtil.getLatBuffer();
 		this.longitudeBuffer = modelGridUtil.getLonBuffer();
+	}
+	
+	private void readRegridInfo() {
+		
+		System.out.println("\t-> Read KimRdps Regrid Info");
+		
+		this.regridInfo = new HashMap<String, String>();
+		
+		File regridInfoFile = new File(String.format("%s/%s", DaemonSettings.getCurrentWorkingDirectory(), "res/kim_rdps_ne57_regrid_info.txt"));
+		
+		try {
+			
+			LineNumberReader reader = new LineNumberReader(new FileReader(regridInfoFile));
+			
+			String line = "";
+			
+			while((line = reader.readLine()) != null) {
+				
+				String key = line.split("\\|")[0];
+				String value = line.split("\\|")[1];
+				
+				this.regridInfo.put(key, value);
+			}
+			
+			reader.close();
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void generateImages(NetcdfDataset ncFile, String fileName, String savePath) {
@@ -71,7 +109,7 @@ public class KimRdpsRegridImageGeneratorTest {
 		System.out.println("KimRdpsImageGenerator [ End Create Images ]");
 	}
 	
-	private Map<String, Object> getRegridData(Float[][] values, BoundLonLat maxBoundLonLat, int rows, int cols) {
+	private Map<String, Object> getRegridData(float[][] values, BoundLonLat maxBoundLonLat, int rows, int cols) {
 		
 		System.out.println("\t\t-> Start Regriding");
 		
@@ -121,23 +159,20 @@ public class KimRdpsRegridImageGeneratorTest {
 					double regridLat = minLat + latTerm * j;
 					double regridLon = minLon + lonTerm * k;
 					
-					//if(regridLat >= this.cropBottom && regridLat <= this.cropTop && regridLon >= this.cropLeft && regridLon <= this.cropRight) {
-						
-						this.modelGridUtil.setSingleGridBoundInfoforDistanceGrid(regridLon, regridLat);
-						
-						BoundLonLat boundLonLat = this.modelGridUtil.getBoundLonLat();
-						BoundXY boundXY = this.modelGridUtil.getBoundXY();
-						
-						float originLat = (float)boundLonLat.getTop();
-						float originLon = (float)boundLonLat.getLeft();
-						
-						if(Math.abs(originLat - regridLat) < latTerm*3 && Math.abs(originLon - regridLon) < lonTerm*3) {
-							regridValues[j][k] = values[boundXY.getTop()][boundXY.getLeft()];
-						}	
-					//}
+					String[] regridInfoTokens = this.regridInfo.get(regridLat + "," + regridLon).split(",");
+					
+					float originLat = Float.valueOf(regridInfoTokens[0]);
+					float originLon = Float.valueOf(regridInfoTokens[1]);
+					int boundTop = Integer.valueOf(regridInfoTokens[2]);
+					int boundLeft = Integer.valueOf(regridInfoTokens[3]);
+					
+					if(Math.abs(originLat - regridLat) < latTerm*3 && Math.abs(originLon - regridLon) < lonTerm*3) {
+						regridValues[j][k] = values[boundTop][boundLeft];
+					}
 				}
 			}
 		}
+		
 		
 		Map<String, Object> regridData = new HashMap<String, Object>();
 		regridData.put("regridValues", regridValues);
@@ -181,11 +216,11 @@ public class KimRdpsRegridImageGeneratorTest {
 					
 				List<Range> rangeList = new ArrayList<Range>();
 				rangeList.add(new Range(0, 0));		
-				rangeList.add(new Range(23-j, 23-j));						
+				rangeList.add(new Range(j, j));						
 				rangeList.add(new Range(modelGridUtil.getModelHeight() - boundXY.getTop() - 1, modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));
 				rangeList.add(new Range(boundXY.getLeft(), boundXY.getRight()));
 			
-				Float[][] values = GridCalcUtil.convertStorageToValues(var.read(rangeList).getStorage(), rows, cols);
+				float[][] values = GridCalcUtil.convertStorageToPrimitiveValuesFromAttr(var, var.read(rangeList).getStorage(), rows, cols);
 				
 				System.out.println("\t\t-> End Read Variable [" + this.varName + "]");
 				
@@ -196,7 +231,7 @@ public class KimRdpsRegridImageGeneratorTest {
 				double latTerm = (double)regridData.get("latTerm");
 				double lonTerm = (double)regridData.get("lonTerm");
 				
-				String imgFileName = fileName.replace(".gb2", "") + "_" + String.format("%03d", j+1) + ".png";
+				String imgFileName = fileName.replace(".nc", "") + "_" + String.format("%03d", j+1) + ".png";
 					
 				File imageFile = new File(savePath + File.separator + imgFileName);
 				
@@ -258,12 +293,12 @@ public class KimRdpsRegridImageGeneratorTest {
 	
 	public static void main(String[] args) {
         
-		KimRdpsRegridImageGeneratorTest kimRdpsImageGeneratorTest = new KimRdpsRegridImageGeneratorTest();
+		KimRdpsNe57RegridImageGeneratorTest kimRdpsImageGeneratorTest = new KimRdpsNe57RegridImageGeneratorTest();
                   
 		try {
 						
-			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/data/datastore/KIM_RDPS/2025/04/20/00/r030_v040_ne36_pres_h000.2025042000.gb2", null);
-			String fileName = "r030_v040_ne36_pres_h000.2025042000.gb2";
+			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/KAMA_AAMI/2026/항기청_수신/항기청_수신_20260514/r030_v040_easia_prs.2byte.ft000.2026050100.nc", null);
+			String fileName = "r030_v040_easia_prs.2byte.ft000.2026050100.nc";
 	        String savePath = "F:/data/kim_rdps_img";
 	        
 	        kimRdpsImageGeneratorTest.generateImages(ncFile, fileName, savePath);
