@@ -101,7 +101,7 @@ public class KimGdpsLegendFilter {
 	     * gamma correction
 	     * 중간톤 강조
 	     */
-	    t = (float)Math.pow(t, 0.80);
+	  //  t = (float)Math.pow(t, 0.80);
 
 	    /*
 	     * subtle meteorological palette

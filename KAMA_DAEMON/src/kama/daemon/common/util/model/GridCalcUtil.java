@@ -149,6 +149,48 @@ public class GridCalcUtil {
 		return values;
     }
 	
+	public static float[] convertStorageToPrimitiveValues(Object storage) {
+    	
+    	float[] values = null;
+    	
+    	if(storage instanceof float[]) {
+    		
+    		return (float[])storage;
+    		
+    	} else if(storage instanceof double[]) {
+    		
+			values = new float[((double[]) storage).length];
+
+			for (int i = 0; i < values.length; i++) {
+
+				float f = (float) ((double[]) storage)[i];
+
+				if (!Float.isNaN(f)) {
+					values[i] = f;
+				} else {
+					values[i] = -999.0f;
+				}
+			}
+    		
+    	} else if(storage instanceof short[]) {
+    		
+            values = new float[((short[]) storage).length];
+            
+            for (int i = 0; i < values.length; i++) {
+
+				float f = (float) ((short[]) storage)[i];
+
+				if (!Float.isNaN(f)) {
+					values[i] = f;
+				} else {
+					values[i] = -999.0f;
+				}
+            }
+    	}
+		
+		return values;
+    }
+	
 	public static float[][] convertStorageToPrimitiveValues(Object storage, int rows, int cols) {
     	
     	float[][] values = new float[rows][cols];
@@ -254,6 +296,15 @@ public class GridCalcUtil {
 		return values;
     }
 	
+	public static float[] convertStorageToPrimitiveValuesFromAttr(Variable var, Object storage) {
+		
+	    float[] values = convertStorageToPrimitiveValues(storage);
+
+	    applyScaleOffsetFromAttr(values, var);
+
+	    return values;
+	}
+	
 	public static float[][] convertStorageToPrimitiveValuesFromAttr(Variable var, Object storage, int rows, int cols) {
 		
 	    float[][] values = convertStorageToPrimitiveValues(storage, rows, cols);
@@ -284,6 +335,18 @@ public class GridCalcUtil {
 	            }
 	        }
 	    }
+	}
+	
+	private static void applyScaleOffsetFromAttr(float[] values, Variable var) {
+		
+	    float scale = (float) getDoubleAttr(var, "scale_factor", 1.0);
+	    float offset = (float) getDoubleAttr(var, "add_offset", 0.0);
+
+		for (int i = 0; i < values.length; i++) {
+			if (!Float.isNaN(values[i]) && values[i] != -999.0f) {
+				values[i] = values[i] * scale + offset;
+			}
+		}
 	}
 	
 	public static double getDoubleAttr(Variable var, String attrName, double defaultValue) {
