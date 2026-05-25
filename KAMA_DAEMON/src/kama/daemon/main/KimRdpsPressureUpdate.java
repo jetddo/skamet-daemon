@@ -350,7 +350,7 @@ public class KimRdpsPressureUpdate {
 				
 				try {
 					
-					p_3h = (float)(dataList.get(i-3).get("p"));
+					p_3h = (float)(dataList.get(j-3).get("p"));
 					
 				} catch (Exception e) {
 					p_3h = -1;
