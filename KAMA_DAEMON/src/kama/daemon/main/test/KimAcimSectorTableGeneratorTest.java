@@ -558,11 +558,14 @@ public class KimAcimSectorTableGeneratorTest {
 				
 		BoundXY boundXY = modelGridUtil.getBoundXY();
 		
-		int cropModelLeft = boundXY.getLeft();
-		int cropModelRight = boundXY.getRight();
-		int cropModelTop = modelGridUtil.getModelHeight() - boundXY.getTop() - 1;
-		int cropModelBottom = modelGridUtil.getModelHeight() - boundXY.getBottom() - 1;
-		
+        int cropLeft = boundXY.getLeft();
+        int cropRight = boundXY.getRight();
+        // 중요:
+        // 좌표파일 / NetCDF / koreaData는 위도가 낮은 쪽부터 저장됨.
+        // 따라서 Y index는 bottom이 작고, top이 큼.
+        int cropBottom = boundXY.getBottom(); // 저위도, 작은 Y index
+        int cropTop = boundXY.getTop();       // 고위도, 큰 Y index
+        
 		// 유효격자수
 		int validCount = 0;
 		
@@ -573,24 +576,54 @@ public class KimAcimSectorTableGeneratorTest {
 				
 			double[] polygonExtent = getPolygonExtent(sectorPolygon);
 			
-			PointXY polygonLeftTop = modelGridUtil.getPointXY(polygonExtent[2], polygonExtent[0]);
-			int leftTopX = polygonLeftTop.getX();
-			int leftTopY = modelGridUtil.getModelHeight() - polygonLeftTop.getY() - 1;
-				
-			PointXY polygonRightBottom = modelGridUtil.getPointXY(polygonExtent[3], polygonExtent[1]);
-			int rightBottomX = polygonRightBottom.getX();
-			int rightBottomY = modelGridUtil.getModelHeight() - polygonRightBottom.getY() - 1;
+			double topLat = polygonExtent[0];
+	        double bottomLat = polygonExtent[1];
+	        double leftLon = polygonExtent[2];
+	        double rightLon = polygonExtent[3];
+
+	        PointXY polygonLeftTop = modelGridUtil.getPointXY(leftLon, topLat);
+	        PointXY polygonRightBottom = modelGridUtil.getPointXY(rightLon, bottomLat);
+
+	        int polygonLeft = polygonLeftTop.getX();
+	        int polygonRight = polygonRightBottom.getX();
+
+	        // 여기서도 Y를 뒤집지 않는다.
+	        // getPointXY가 반환하는 Y는 원본 좌표파일 index 기준이다.
+	        int polygonTop = polygonLeftTop.getY();
+	        int polygonBottom = polygonRightBottom.getY();
+
+//	        System.out.println(":: polygon 원본 좌표계");
+//	        System.out.println("left   = " + polygonLeft);
+//	        System.out.println("right  = " + polygonRight);
+//	        System.out.println("bottom = " + polygonBottom);
+//	        System.out.println("top    = " + polygonTop);
+
+	        int startX = Math.max(polygonLeft, cropLeft);
+	        int endX = Math.min(polygonRight, cropRight);
+	        int startY = Math.max(polygonBottom, cropBottom);
+	        int endY = Math.min(polygonTop, cropTop);
+
+//	        System.out.println(":: 실제 loop 범위");
+//	        System.out.println("x = " + startX + " ~ " + endX);
+//	        System.out.println("y = " + startY + " ~ " + endY);
 			
-			for (int i = leftTopY; i <= rightBottomY; i++) {
-				for (int j = leftTopX; j <= rightBottomX; j++) {				
+	        for (int modelY = startY; modelY <= endY; modelY++) {
+	            for (int modelX = startX; modelX <= endX; modelX++) {
 					
-					float value = koreaData[cropModelBottom - i][j - cropModelLeft];
+	            	int dataX = modelX - cropLeft;
+	                int dataY = modelY - cropBottom;
+
+	                Float value = koreaData[dataY][dataX];
 					
-					PointLonLat pointLonLat = modelGridUtil.getPointLonLat(j, modelGridUtil.getModelHeight() - 1 - i);
+	                PointLonLat lonLat = modelGridUtil.getPointLonLat(modelX, modelY);
 					
-					boolean isInPolygon = isPointInPolygon(sectorPolygon, pointLonLat.getLon(), pointLonLat.getLat());
+	                boolean inPolygon = isPointInPolygon(
+	                		sectorPolygon,
+	                        lonLat.getLon(),
+	                        lonLat.getLat()
+	                    );
 					
-					if (isInPolygon) {
+					if (inPolygon) {
 						
 						validCount++;
 						
