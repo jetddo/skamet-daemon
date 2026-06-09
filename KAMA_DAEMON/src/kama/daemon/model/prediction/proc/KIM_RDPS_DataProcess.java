@@ -60,7 +60,7 @@ public class KIM_RDPS_DataProcess extends DataProcessor
     		ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));    		    		
     		ftp.connect(host);
     		int reply = ftp.getReplyCode();
-    		
+    			
     		if(!FTPReply.isPositiveCompletion(reply)) {
     			ftp.disconnect();
     			throw new Exception("Exception in connecting to FTP Server");
@@ -73,8 +73,6 @@ public class KIM_RDPS_DataProcess extends DataProcessor
     		Calendar cal = new GregorianCalendar();
     		cal.setTime(processorInfo.FileDateFromNameOriginal);
     		
-    		String issuedDtStr = new SimpleDateFormat("yyyyMMddHHmm").format(cal.getTime());
-    		
         	for(int i=0 ; i<fileInfoList.size() ; i++) {
         		
         		Map<String, Object> fileInfo = fileInfoList.get(i);
@@ -82,15 +80,11 @@ public class KIM_RDPS_DataProcess extends DataProcessor
         		File imgFile = (File)fileInfo.get("imageFile"); 
         		File xmlFile = (File)fileInfo.get("xmlFile");
         		
-        		String feet = (String)fileInfo.get("feet");
-        		
         		String wintemImgFileName = imgFile.getName();
+        		String wintemXmlFileName = xmlFile.getName();
         		
-        		Integer height = Integer.valueOf(wintemImgFileName.split("\\.")[0].split("_")[3]);
-        		Integer hour = Integer.valueOf(wintemImgFileName.split("\\.")[0].split("_")[1].replace("pb", ""));
-        		
-        		String ftpImgFileName = "LOW_WINTEM_FL" + feet + "_" + String.format("%02d", hour) + "H_" + issuedDtStr + ".jpg";
-        		String ftpXmlFileName = "LOW_WINTEM_FL" + feet + "_" + String.format("%02d", hour) + "H_" + issuedDtStr + ".xml";
+        		String ftpImgFileName = wintemImgFileName.replaceAll("WINTEM_KIM_RDPS_NOR", "LOW_WINTEM");
+        		String ftpXmlFileName = wintemXmlFileName.replaceAll("WINTEM_KIM_RDPS_NOR", "LOW_WINTEM");
         		        		
         		try(InputStream input = new FileInputStream(imgFile)) {
         			ftp.storeFile("/RCVD/KAMA/" + ftpImgFileName, input);
@@ -141,6 +135,9 @@ public class KIM_RDPS_DataProcess extends DataProcessor
 	        
 	        List<Map<String, Object>> fileInfoList1 = kimRdpsRegridWintemImageGenerator.generateImages(ncFile, kimRdpsFile.getName(), kimRdpsImgSavePath, paramMap1);
 	        
+	        System.out.println(fileInfoList1);
+	        this.sendFileToAcom(fileInfoList1, processorInfo);
+	        
 	        // 위기상태 이미지 생성
 	        Map<String, String> paramMap2 = new HashMap<String, String>();
 	        paramMap2.put("cropTop", "44");
@@ -154,8 +151,6 @@ public class KIM_RDPS_DataProcess extends DataProcessor
 	        
 	        List<Map<String, Object>> fileInfoList2 = kimRdpsRegridWintemImageGenerator.generateImages(ncFile, kimRdpsFile.getName(), kimRdpsImgSavePath, paramMap2);
         	
-//        	this.sendFileToAcom(fileInfoList, processorInfo);
-        
             ncFile.close();	
             
         } catch (Exception e) {
@@ -184,7 +179,7 @@ public class KIM_RDPS_DataProcess extends DataProcessor
             if (file.getName().endsWith(".gb2"))
             {
             	
-            	this.generateKimRdpsWintemImageFiles(file, dbManager, processorInfo);         
+//            	this.generateKimRdpsWintemImageFiles(file, dbManager, processorInfo);         
             	
                 if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
                 {

@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -23,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -86,6 +89,8 @@ public class MakeKimRdpsNe57RegridWintemImage {
 	private Configuration config;
 	
 	private DatabaseManager dbManager;
+	
+	private XMLOutputFactory factory = XMLOutputFactory.newFactory();
 	
 	private boolean initialize() {
 		
@@ -187,12 +192,12 @@ public class MakeKimRdpsNe57RegridWintemImage {
 			return;
 		}
 		
-		final String kimRdpsFilter = "r030_v040_easia_prs.2byte.ft[0-9]{3}.[0-9]{8}00.nc";
+		final String kimRdpsFilter = "r030_v040_easia_prs.2byte.ft[0-9]{3}.[0-9]{10}.nc";
 		
 		String storePath = DaemonUtils.isWindow() ? this.config.getString("global.storePath.windows") 
 												  : this.config.getString("global.storePath.unix");
 		
-		//storePath = "\\\\172.26.56.124\\data_store";
+//		storePath = "\\\\172.26.56.124\\data_store";
 		
 		try {
 						
@@ -315,7 +320,8 @@ public class MakeKimRdpsNe57RegridWintemImage {
 				
 				Date fileDt = sdf2.parse(fileName.split("\\.")[3]);
 				
-		        String savePath = storePath + "/KIM_RDPS_NE57_WINTEM/" + sdf3.format(fileDt) ;
+				String savePath = storePath + "/KIM_RDPS_WINTEM/" + sdf3.format(fileDt) ;
+//		        String savePath = storePath + "/KIM_RDPS_NE57_WINTEM/" + sdf3.format(fileDt) ;
 		        
 		        File saveDir = new File(savePath);
 		        
@@ -337,23 +343,23 @@ public class MakeKimRdpsNe57RegridWintemImage {
 		        this.generateImage(ncFile, fileName, savePath, paramMap1);		
 		        
 //		        // 위기상태 이미지 생성
-//		        Map<String, String> paramMap2 = new HashMap<String, String>();
-//		        paramMap2.put("cropTop", "44");
-//		        paramMap2.put("cropBottom", "27.5");
-//		        paramMap2.put("cropLeft", "119");
-//		        paramMap2.put("cropRight", "135");
-//		        paramMap2.put("imgWidth", "720");
-//		        paramMap2.put("imgHeight", "900");	  
-//		        paramMap2.put("weatherType", "WRN");
-//		        paramMap2.put("wintemBaseImg", "wintem_base3_upscaled.png");
-//		        
-//		        this.generateImage(ncFile, fileName, savePath, paramMap2);		
+		        Map<String, String> paramMap2 = new HashMap<String, String>();
+		        paramMap2.put("cropTop", "44");
+		        paramMap2.put("cropBottom", "27.5");
+		        paramMap2.put("cropLeft", "119");
+		        paramMap2.put("cropRight", "135");
+		        paramMap2.put("imgWidth", "720");
+		        paramMap2.put("imgHeight", "900");	  
+		        paramMap2.put("weatherType", "WRN");
+		        paramMap2.put("wintemBaseImg", "wintem_base3_upscaled.png");
+		        
+		        this.generateImage(ncFile, fileName, savePath, paramMap2);		
 		        
 				String query = this.insertFileProcInfo.replaceAll("\\{fileDt\\}", sdf2.format(fileDt))
 						  							  .replaceAll("\\{fileName\\}", fileName)
 						  							  .replaceAll("\\{filePath\\}", kimRdpsFile.getAbsolutePath());
 				
-				//this.dbManager.executeQuery(query);
+				this.dbManager.executeQuery(query);
 				this.dbManager.commit();
 				
 				ncFile.close();
@@ -552,6 +558,87 @@ public class MakeKimRdpsNe57RegridWintemImage {
 				ig2 = null;
 				///////////////////////////////////////////////////////////////////////////////////
 				
+				System.out.println();
+				
+				String xmlFileName = imgFileName.replace("jpg", "xml");
+				
+				File xmlFile = new File(savePath + File.separator + xmlFileName);
+				
+				System.out.println("\t\t-> Start Write Xml [" + xmlFile.getAbsolutePath() + "]");
+				
+				fileInfo.put("xmlFile", xmlFile);
+				
+				FileWriter writer = new FileWriter(xmlFile);
+				
+				XMLStreamWriter xmlwriter = factory.createXMLStreamWriter(writer);
+				
+				xmlwriter.writeStartDocument();
+			    
+			    xmlwriter.writeStartElement("wintem");
+			    
+			    xmlwriter.writeAttribute("model", "kim_rdps");
+			    xmlwriter.writeAttribute("timezone", "utc");
+			    xmlwriter.writeAttribute("issued_dt", new SimpleDateFormat("yyyyMMddHH").format(issuedDt));
+			    xmlwriter.writeAttribute("fcst_dt", new SimpleDateFormat("yyyyMMddHH").format(fcstDt));
+			    xmlwriter.writeAttribute("height", "FL"+heightText);
+			    xmlwriter.writeAttribute("ws_unit", "knot");
+			    xmlwriter.writeAttribute("wd_unit", "degree");
+			    xmlwriter.writeAttribute("temp_unit", "℃");
+			    xmlwriter.writeAttribute("projection", "epsg:4326");
+			    xmlwriter.writeAttribute("boundary", cropTop + " " + cropBottom + " " + cropLeft + " " + cropRight);
+			    				    
+			    for(int k=0 ; k<rows ; k++) {
+					
+					for(int l=0 ; l<cols ; l++) {
+						
+						if(k % 30 != 0 || l % 20 != 0) {
+							continue;
+						}
+						
+						float u = regridValuesUWind[k][l];
+						float v = regridValuesVWind[k][l];
+						
+						if(u == -999 || v == -999) {
+							continue;
+						}
+							
+						double wd = Math.atan2(u, v) * 180 / Math.PI + 180;		
+						double ws = Math.sqrt(u*u + v*v);
+						int temp = (int)(regridValuesTemp[k][l] - 273.15);	
+						
+						double xCoord = boundLonLat.getLeft() + l * lonTerm;							
+						double yCoord = boundLonLat.getTop() - k * latTerm;
+						
+						if(xCoord < cropLeft || xCoord > cropRight || yCoord < cropBottom || yCoord > cropTop) {
+							continue;
+						}
+					
+						xmlwriter.writeStartElement("grid");
+						xmlwriter.writeAttribute("lat", yCoord+"");
+					    xmlwriter.writeAttribute("lon", xCoord+"");
+					    
+						xmlwriter.writeStartElement("wd");
+						xmlwriter.writeCharacters(wd+"");
+						xmlwriter.writeEndElement();
+						xmlwriter.writeStartElement("ws");
+						xmlwriter.writeCharacters(ws+"");
+						xmlwriter.writeEndElement();
+						xmlwriter.writeStartElement("temp");
+						xmlwriter.writeCharacters(temp+"");
+						xmlwriter.writeEndElement();						   
+					    
+					    xmlwriter.writeEndElement();
+					}
+				}
+				
+				xmlwriter.writeEndElement();					
+				xmlwriter.writeEndDocument();
+				
+				writer.flush();
+				writer.close();
+				
+				System.out.println("\t\t-> End Write Xml [" + xmlFile.getAbsolutePath() + "]");
+				System.out.println();
 			}
 		
 		} catch (Exception e) {
@@ -794,10 +881,142 @@ public class MakeKimRdpsNe57RegridWintemImage {
 		
 		Map<String, Object> wintemUseDataInfo = null;
 		
+		// FT1000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "1");
+		wintemUseDataInfo.put("heightText", "010");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+
+		// FT2000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "2,3");
+		wintemUseDataInfo.put("heightText", "020");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT2500		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "3");
+		wintemUseDataInfo.put("heightText", "025");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+
+		// FT3000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "4");
+		wintemUseDataInfo.put("heightText", "030");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT4000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "5");
+		wintemUseDataInfo.put("heightText", "040");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT5000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "6");
+		wintemUseDataInfo.put("heightText", "050");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
 		// FT6000		
 		wintemUseDataInfo = new HashMap<String, Object>();
-		wintemUseDataInfo.put("heightIndexes", "0");
+		wintemUseDataInfo.put("heightIndexes", "7");
 		wintemUseDataInfo.put("heightText", "060");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT7000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "7,8");
+		wintemUseDataInfo.put("heightText", "070");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT8000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "8");
+		wintemUseDataInfo.put("heightText", "080");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT9000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "8,9");
+		wintemUseDataInfo.put("heightText", "090");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT10000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "9");
+		wintemUseDataInfo.put("heightText", "100");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT12000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "10");
+		wintemUseDataInfo.put("heightText", "120");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT14000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "11");
+		wintemUseDataInfo.put("heightText", "140");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT16000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "12");
+		wintemUseDataInfo.put("heightText", "160");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT18000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "13");
+		wintemUseDataInfo.put("heightText", "180");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT21000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "14");
+		wintemUseDataInfo.put("heightText", "210");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT24000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "15");
+		wintemUseDataInfo.put("heightText", "240");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT27000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "16");
+		wintemUseDataInfo.put("heightText", "270");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT30000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "17");
+		wintemUseDataInfo.put("heightText", "300");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT34000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "18");
+		wintemUseDataInfo.put("heightText", "340");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT39000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "19");
+		wintemUseDataInfo.put("heightText", "390");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT44000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "20");
+		wintemUseDataInfo.put("heightText", "440");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT52000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "21");
+		wintemUseDataInfo.put("heightText", "520");
 		wintemUseDataInfoList.add(wintemUseDataInfo);
 		
 		

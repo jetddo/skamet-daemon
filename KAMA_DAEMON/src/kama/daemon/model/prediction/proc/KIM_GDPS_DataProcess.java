@@ -184,30 +184,30 @@ public class KIM_GDPS_DataProcess extends DataProcessor
             if (file.getName().endsWith(".gb2"))
             {
             	
-            	this.generateKimGdpsWintemImageFiles(file, dbManager, processorInfo);       
+//            	this.generateKimGdpsWintemImageFiles(file, dbManager, processorInfo);       
             	
-//                if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
-//                {
-//                    query = buildFileInfoQuery(processorInfo, new File(processorInfo.FileSavePath, file.getName()));
-//                    queriesList.add(query);
-//                }
+                if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
+                {
+                    query = buildFileInfoQuery(processorInfo, new File(processorInfo.FileSavePath, file.getName()));
+                    queriesList.add(query);
+                }
                 
             }
         }
 
         // 쿼리 한꺼번에 처리
-//        for (String savedQuery : queriesList)
-//        {
-//            dbManager.executeUpdate(savedQuery);
-//        }
-//
-//        for (File file : dataFiles)
-//        {
-//            if (file.exists())
-//            {
-//                file.delete();
-//            }
-//        }
+        for (String savedQuery : queriesList)
+        {
+            dbManager.executeUpdate(savedQuery);
+        }
+
+        for (File file : dataFiles)
+        {
+            if (file.exists())
+            {
+                file.delete();
+            }
+        }
 
         dbManager.commit();
     }

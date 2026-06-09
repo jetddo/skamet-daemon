@@ -145,7 +145,7 @@ public class MakeKimGdpsNe57WintemImage {
 			return;
 		}
 		
-		final String kimGdpsFilter = "g576_v091_glob_prs.2byte.ft[0-9]{3}.[0-9]{8}00.nc";
+		final String kimGdpsFilter = "g576_v091_glob_prs.2byte.ft[0-9]{3}.[0-9]{10}.nc";
 		
 		String storePath = DaemonUtils.isWindow() ? this.config.getString("global.storePath.windows") 
 												  : this.config.getString("global.storePath.unix");
@@ -216,7 +216,7 @@ public class MakeKimGdpsNe57WintemImage {
 							Date fileDt = sdf2.parse(parsedFileInfo.get("fileDt").toString());
 							String fileName = parsedFileInfo.get("fileName").toString();
 							
-							if(kimGdpsFile.getName().equals(fileName)) {
+							if(kimGdpsFile.getName().equals(fileName)) {								
 								isParsed = true;
 							}
 						}
@@ -273,7 +273,8 @@ public class MakeKimGdpsNe57WintemImage {
 				
 				Date fileDt = sdf2.parse(fileName.split("\\.")[3]);
 				
-		        String savePath = storePath + "/KIM_GDPS_NE57_WINTEM/" + sdf3.format(fileDt) ;
+				String savePath = storePath + "/KIM_GDPS_WINTEM/" + sdf3.format(fileDt) ;
+		        //String savePath = storePath + "/KIM_GDPS_NE57_WINTEM/" + sdf3.format(fileDt) ;
 		        
 		        File saveDir = new File(savePath);
 		        
@@ -294,24 +295,24 @@ public class MakeKimGdpsNe57WintemImage {
 		        
 		        this.generateImage(ncFile, fileName, savePath, paramMap1);		
 		        
-//		        // 위기상태 이미지 생성
-//		        Map<String, String> paramMap2 = new HashMap<String, String>();
-//		        paramMap2.put("cropTop", "44");
-//		        paramMap2.put("cropBottom", "27.5");
-//		        paramMap2.put("cropLeft", "119");
-//		        paramMap2.put("cropRight", "135");
-//		        paramMap2.put("imgWidth", "720");
-//		        paramMap2.put("imgHeight", "900");	  
-//		        paramMap2.put("weatherType", "WRN");
-//		        paramMap2.put("wintemBaseImg", "wintem_base3_upscaled.png");
-//		        
-//		        this.generateImage(ncFile, fileName, savePath, paramMap2);		
+		        // 위기상태 이미지 생성
+		        Map<String, String> paramMap2 = new HashMap<String, String>();
+		        paramMap2.put("cropTop", "44");
+		        paramMap2.put("cropBottom", "27.5");
+		        paramMap2.put("cropLeft", "119");
+		        paramMap2.put("cropRight", "135");
+		        paramMap2.put("imgWidth", "720");
+		        paramMap2.put("imgHeight", "900");	  
+		        paramMap2.put("weatherType", "WRN");
+		        paramMap2.put("wintemBaseImg", "wintem_base3_upscaled.png");
+		        
+		        this.generateImage(ncFile, fileName, savePath, paramMap2);		
 		        
 				String query = this.insertFileProcInfo.replaceAll("\\{fileDt\\}", sdf2.format(fileDt))
 						  							  .replaceAll("\\{fileName\\}", fileName)
 						  							  .replaceAll("\\{filePath\\}", kimGdpsFile.getAbsolutePath());
 				
-				//this.dbManager.executeQuery(query);
+				this.dbManager.executeQuery(query);
 				this.dbManager.commit();
 				
 				ncFile.close();
@@ -657,11 +658,145 @@ public class MakeKimGdpsNe57WintemImage {
 		
 		Map<String, Object> wintemUseDataInfo = null;
 		
+		// FT1000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "1");
+		wintemUseDataInfo.put("heightText", "010");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+
+		// FT2000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "2,3");
+		wintemUseDataInfo.put("heightText", "020");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT2500		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "3");
+		wintemUseDataInfo.put("heightText", "025");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+
+		// FT3000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "4");
+		wintemUseDataInfo.put("heightText", "030");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT4000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "5");
+		wintemUseDataInfo.put("heightText", "040");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT5000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "6");
+		wintemUseDataInfo.put("heightText", "050");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
 		// FT6000		
 		wintemUseDataInfo = new HashMap<String, Object>();
-		wintemUseDataInfo.put("heightIndexes", "0");
+		wintemUseDataInfo.put("heightIndexes", "7");
 		wintemUseDataInfo.put("heightText", "060");
 		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT7000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "7,8");
+		wintemUseDataInfo.put("heightText", "070");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT8000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "8");
+		wintemUseDataInfo.put("heightText", "080");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT9000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "8,9");
+		wintemUseDataInfo.put("heightText", "090");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT10000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "9");
+		wintemUseDataInfo.put("heightText", "100");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT12000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "10");
+		wintemUseDataInfo.put("heightText", "120");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT14000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "11");
+		wintemUseDataInfo.put("heightText", "140");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT16000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "12");
+		wintemUseDataInfo.put("heightText", "160");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT18000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "13");
+		wintemUseDataInfo.put("heightText", "180");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT21000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "14");
+		wintemUseDataInfo.put("heightText", "210");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT24000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "15");
+		wintemUseDataInfo.put("heightText", "240");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT27000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "16");
+		wintemUseDataInfo.put("heightText", "270");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT30000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "17");
+		wintemUseDataInfo.put("heightText", "300");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT34000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "18");
+		wintemUseDataInfo.put("heightText", "340");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT39000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "19");
+		wintemUseDataInfo.put("heightText", "390");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT44000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "20");
+		wintemUseDataInfo.put("heightText", "440");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		// FT52000		
+		wintemUseDataInfo = new HashMap<String, Object>();
+		wintemUseDataInfo.put("heightIndexes", "21");
+		wintemUseDataInfo.put("heightText", "520");
+		wintemUseDataInfoList.add(wintemUseDataInfo);
+		
+		
 		
 		
 		return wintemUseDataInfoList;

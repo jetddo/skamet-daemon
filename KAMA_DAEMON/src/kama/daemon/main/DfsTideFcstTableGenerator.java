@@ -234,7 +234,7 @@ public class DfsTideFcstTableGenerator {
 		
 			this.config = configs.properties(new File(DaemonUtils.getConfigFilePath()));
 			
-			storePath = this.config.getString("global.storePath.windows");
+			storePath = this.config.getString("global.storePath.unix");
 			
 			//storePath = "\\\\172.26.56.115\\data_store";
 			
@@ -287,18 +287,34 @@ public class DfsTideFcstTableGenerator {
 	     	
 			Date issuedTm = sdf.parse(issuedTmStr);
 	        
-			System.out.println("\n::: Start Generate Sector Table :::");
+			System.out.println("\n::: Start Generate Dfs Tide Fcst :::");
 			System.out.println("-> Issued Time: " + sdf2.format(issuedTm));
+			System.out.println("-> Fcst Day Size: " + fcstDaySize);
 
 	        this.createDfsTideTable(g, width, height, issuedTm, fcstDaySize); // 예보 테이블 정보 생성;
 	        
 	        g.dispose(); // Graphics2D 객체 자원 해제	        
             
-            File imgFile = new File( "F:/data/test.png");
+	        String y = issuedTmStr.substring(0, 4);
+        	String m = issuedTmStr.substring(4, 6);
+        	String d = issuedTmStr.substring(6, 8);
+        	String h = issuedTmStr.substring(8, 10);
+        	
+        	String imgFileDirPath = storePath+"/DFS_TIDE_FCST/"+y+"/"+m+"/"+d;
+        	
+        	//String imgFileDirPath = "C:/data/datastore/DFS_TIDE_FCST/"+y+"/"+m+"/"+d;
+        	
+            File imgFileDir = new File(imgFileDirPath);
+            
+            if(!imgFileDir.exists()) {
+            	imgFileDir.mkdirs();
+            }
+            
+            File imgFile = new File(imgFileDirPath + "/dfs_tide_fcst_f" + (String.format("%02d", fcstDaySize)) + "_"+issuedTmStr+".png");
             
             ImageIO.write(image, "png", imgFile);
             
-            System.out.println("-> Create DfsTide Fcst Table Image: " + imgFile.getAbsolutePath());
+            System.out.println("-> Create Dfs Tide Fcst Image: " + imgFile.getAbsolutePath());
             
         } catch (Exception e) {
         	
@@ -477,7 +493,7 @@ public class DfsTideFcstTableGenerator {
 		
 		// ===== 동네예보 조회 =====
 		
-		for (int regionIndex = 0; regionIndex < dfsPointInfoList.length; regionIndex++) {
+/*		for (int regionIndex = 0; regionIndex < dfsPointInfoList.length; regionIndex++) {
 
 			String[] dfsPointInfo = dfsPointInfoList[regionIndex].split("\\|");
 			
@@ -497,7 +513,7 @@ public class DfsTideFcstTableGenerator {
 				layout.fcstAreaX,
 				layout.bodyY + regionIndex * layout.regionRowH
 			);
-		}
+		}*/
 
 		// ===== 조위 그래프 =====
 		
@@ -662,6 +678,11 @@ public class DfsTideFcstTableGenerator {
 				dupMap.put(fcstDt, null);
 			}
 		}
+		
+		System.out.println("\t>> DFS Data Size: " + dfsProcInfoList.size());
+		System.out.println("\t>> First DFS Fcst Tm: " + dfsProcInfoList.get(0).get("fcstDt"));
+		System.out.println("\t>> Last DFS Fcst Tm: " + dfsProcInfoList.get(dfsProcInfoList.size()-1).get("fcstDt"));
+		
 
 		Date baseDate = sdf.parse(issuedTmStr);
 		DfsGrid dfsGrid = new DfsGrid(nx, ny, 0, 0);
@@ -1698,6 +1719,8 @@ public class DfsTideFcstTableGenerator {
     
     public void process() {
     	
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
+    	
     	System.out.println(this.logDateFormat.format(new Date(System.currentTimeMillis())) + " -> ::::: Start Initialize :::::");
     	
 		if(!this.initialize()) {
@@ -1706,7 +1729,14 @@ public class DfsTideFcstTableGenerator {
 			return;
 		}
 		
-		this.generateDfsTideTable("2026062100", 3);
+		// 현재 실행일 기준으로 +1~+3 일치까지 생성함
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(new Date());
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		
+		for(int i=1 ; i<=3 ; i++) {		
+			this.generateDfsTideTable(sdf.format(cal.getTime()), i);
+		}
 		
 		this.destroy(); // 자원 해제
     }

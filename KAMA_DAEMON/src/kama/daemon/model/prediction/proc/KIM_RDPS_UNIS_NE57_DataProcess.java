@@ -1,33 +1,38 @@
 package kama.daemon.model.prediction.proc;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.NotImplementedException;
+
+import com.google.gson.Gson;
+
 import kama.daemon.common.db.DataProcessor;
 import kama.daemon.common.db.DatabaseManager;
 import kama.daemon.common.db.struct.ProcessorInfo;
 import kama.daemon.common.util.DaemonSettings;
 import kama.daemon.common.util.DataFileStore;
-import kama.daemon.common.util.GZipTgzReader;
 import kama.daemon.common.util.Log;
-import org.apache.commons.lang3.NotImplementedException;
-
-import java.io.*;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
+import kama.daemon.common.util.model.BoundLonLat;
+import kama.daemon.common.util.model.image.GktgImageGenerator;
+import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  * Created by chlee on 2017-02-15.
  */
-public class ECMWF_DataProcess extends DataProcessor
+public class KIM_RDPS_UNIS_NE57_DataProcess extends DataProcessor
 {
-    private static final String DATAFILE_PREFIX = "ecmwf";
+    private static final String DATAFILE_PREFIX = "kim_rdps_unis_ne57";
     private static final int DB_COLUMN_COUNT = 2;
-    private static final int FILE_DATE_INDEX_POS = 2; // 20170101/qwumrea_pb000.nc.tgz
+    private static final int FILE_DATE_INDEX_POS = 2; // 20170101/visibility.nc
     private static final int[] DB_PRIMARY_KEY_INDEXES = { 0 }; // COL
     private final int INSERT_QUERY_1 = 1;
     private final int INSERT_QUERY_2 = 2;
     private final int DELETE_QUERY = 3;
 
-    public ECMWF_DataProcess(DaemonSettings settings)
+    public KIM_RDPS_UNIS_NE57_DataProcess(DaemonSettings settings)
     {
         super(settings, DATAFILE_PREFIX);
         
@@ -39,29 +44,28 @@ public class ECMWF_DataProcess extends DataProcessor
     protected void processDataByFileGroup(DatabaseManager dbManager, File[] dataFiles, ProcessorInfo processorInfo) throws Exception
     {
         String query = null;
-        Object[] bindArray = new Object[2];
         List<String> queriesList;
 
         queriesList = new ArrayList<>();
-
-        // subgroup 갯수
-        Log.print("INFO : File subgroup COUNT -> {0}", dataFiles.length);
-
+                
         // 파일 전부 extract
         for (File file : dataFiles)
         {
             // 처리할 파일명 로그 print
-        	Log.print("INFO : File NAME -> {0}", file.getAbsoluteFile());
-
-            if (file.getName().endsWith(".nc"))
-            {  
-
-                if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
-                {
-                    query = buildFileInfoQuery(processorInfo, new File(processorInfo.FileSavePath, file.getName()));
-                    queriesList.add(query);
-                }
-                
+        	Log.print("INFO : File NAME -> {0}", file.getAbsoluteFile()); 
+                 
+            if (DataFileStore.storeDateFile(file, processorInfo.FileSavePath))
+            {
+                query = buildFileInfoQuery(processorInfo, new File(processorInfo.FileSavePath, file.getName()));
+                queriesList.add(query);
+            }
+        }
+//
+        for (File file : dataFiles)
+        {
+            if (file.exists())
+            {
+                file.delete();
             }
         }
 
@@ -69,14 +73,6 @@ public class ECMWF_DataProcess extends DataProcessor
         for (String savedQuery : queriesList)
         {
             dbManager.executeUpdate(savedQuery);
-        }
-
-        for (File file : dataFiles)
-        {
-            if (file.exists())
-            {
-                file.delete();
-            }
         }
 
         dbManager.commit();
@@ -92,7 +88,6 @@ public class ECMWF_DataProcess extends DataProcessor
     @Override
     protected void defineQueries()
     {
-
     }
     //</editor-fold>
 

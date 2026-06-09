@@ -35,7 +35,7 @@ import ucar.ma2.Range;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-public class MakeKimGdpsTropImage {
+public class MakeKimGdpsNe57TropImage {
 	
 	private ModelGridUtil modelGridUtil;
 	
@@ -49,7 +49,7 @@ public class MakeKimGdpsTropImage {
 	private final String insertFileProcInfo = 
 			
 			" INSERT INTO AAMI.STORED_FILE_PROC_H(FILE_DT, FILE_NAME, FILE_PATH, PROC_DT, FILE_CD) VALUES " + 
-			" (TO_DATE('{fileDt}', 'YYYYMMDDHH24MI'), '{fileName}', '{filePath}', SYSDATE, 'KIM_GDPS_TROP') "; 
+			" (TO_DATE('{fileDt}', 'YYYYMMDDHH24MI'), '{fileName}', '{filePath}', SYSDATE, 'KIM_GDPS_NE57_TROP') "; 
 	
 	private final String selectFileProcInfoList = 
 			
@@ -58,7 +58,7 @@ public class MakeKimGdpsTropImage {
 			" 	FILE_NAME											"+
 			" FROM AAMI.STORED_FILE_PROC_H							"+
 			" WHERE FILE_DT >= TO_DATE('{targetDt}', 'YYYYMMDD')	"+
-			" AND FILE_CD = 'KIM_GDPS_TROP'							";
+			" AND FILE_CD = 'KIM_GDPS_NE57_TROP'					";
 		
 	private Configuration config;
 	
@@ -94,10 +94,10 @@ public class MakeKimGdpsTropImage {
 		
 		System.out.println("MakeKimGdpsTropImage [ Initailize Coordinate Systems ]");
 		
-		String latPath = config.getString("kim_gdps.coordinates.lat.path");
-		String lonPath = config.getString("kim_gdps.coordinates.lon.path");
+		String latPath = config.getString("kim_gktg.coordinates.lat.path");
+		String lonPath = config.getString("kim_gktg.coordinates.lon.path");
 		
-		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GDPS, ModelGridUtil.Position.MIDDLE_CENTER, latPath, lonPath);
+		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GKTG, ModelGridUtil.Position.MIDDLE_CENTER, latPath, lonPath);
 		
 		System.out.println("MakeKimGdpsTropImage [ Start Create Tile Images ]");		
 		System.out.println("\t-> Create KimGdpsTop Image Grid List");
@@ -130,7 +130,7 @@ public class MakeKimGdpsTropImage {
 			return;
 		}
 		
-		final String kimGdpsFilter = this.config.getString("kim_gdps.filter");
+		final String kimGdpsFilter = this.config.getString("kim_gdps_ne57.filter");
 		
 		String storePath = DaemonUtils.isWindow() ? this.config.getString("global.storePath.windows") 
 												  : this.config.getString("global.storePath.unix");
@@ -164,7 +164,7 @@ public class MakeKimGdpsTropImage {
 				
 				Date targetDt = cal.getTime();			
 				
-				String targetDirStr = storePath + File.separator + "/KIM_GDPS/" + sdf3.format(targetDt);
+				String targetDirStr = storePath + File.separator + "/KIM_GDPS_NE57/" + sdf3.format(targetDt);
 				
 				File targetDir = new File(targetDirStr);
 				
@@ -255,10 +255,10 @@ public class MakeKimGdpsTropImage {
 				
 				NetcdfFile ncFile = NetcdfFile.open(kimGdpsFile.getAbsolutePath());
 				String fileName = kimGdpsFile.getName();
+								
+				Date fileDt = sdf2.parse(fileName.split("\\.")[3]);
 				
-				Date fileDt = sdf2.parse(fileName.split("_")[4].split("\\.")[1]);
-				
-		        String savePath = storePath + "/KIM_GDPS_TROP_IMG/" + sdf3.format(fileDt) ;
+		        String savePath = storePath + "/KIM_GDPS_NE57_TROP_IMG/" + sdf3.format(fileDt) ;
 		        
 		        File saveDir = new File(savePath);
 		        
@@ -314,8 +314,8 @@ public class MakeKimGdpsTropImage {
 			
 			System.out.println("\t-> Process Attribute ["+this.varName+"]");
 			
-			Variable tempVar = ncFile.findVariable("Temperature_isobaric");
-			Variable hgtVar  = ncFile.findVariable("Geopotential_height_isobaric");
+			Variable tempVar = ncFile.findVariable("T");
+			Variable hgtVar  = ncFile.findVariable("hgt");
 
 			/*
 			 * pressure levels (Pa)
@@ -347,20 +347,21 @@ public class MakeKimGdpsTropImage {
 
 			    List<Range> rangeList = new ArrayList<Range>();
 
+			    int readLevel = 23 - level; // 연직 반대로 읽기
+			    
 			    rangeList.add(new Range(0, 0)); // time
-			    rangeList.add(new Range(level, level));
-			    rangeList.add(new Range(modelGridUtil.getModelHeight() - boundXY.getTop() - 1,
-			                            modelGridUtil.getModelHeight() - boundXY.getBottom() - 1));
+			    rangeList.add(new Range(readLevel, readLevel));
+			    rangeList.add(new Range(boundXY.getBottom(), boundXY.getTop()));
 			    rangeList.add(new Range(boundXY.getLeft(), boundXY.getRight()));
 
 			    float[][] tempValues =
-			        GridCalcUtil.convertStorageToPrimitiveValuesReverse(
-			            tempVar.read(rangeList).getStorage(), rows, cols
+			        GridCalcUtil.convertStorageToPrimitiveValuesFromAttr(
+		        		tempVar, tempVar.read(rangeList).getStorage(), rows, cols
 			        );
 
 			    float[][] hgtValues =
-			        GridCalcUtil.convertStorageToPrimitiveValuesReverse(
-			            hgtVar.read(rangeList).getStorage(), rows, cols
+			        GridCalcUtil.convertStorageToPrimitiveValuesFromAttr(
+		        		hgtVar, hgtVar.read(rangeList).getStorage(), rows, cols
 			        );
 
 			    temperatureValues[level] = tempValues;
@@ -485,7 +486,7 @@ public class MakeKimGdpsTropImage {
 
 			System.out.println("\t\t-> End Calculate Tropopause");
 			
-			String imgFileName = fileName.replace(".gb2", "") + "_trop.png";
+			String imgFileName = fileName.replace(".nc", "") + "_trop.png";
 				
 			File imageFile = new File(savePath + File.separator + imgFileName);
 			
@@ -654,7 +655,8 @@ public class MakeKimGdpsTropImage {
 	            double tLower = temperatureValues[level + 1][k][l];
 
 	            if(Double.isNaN(tUpper) || Double.isNaN(tLower)) {
-	                return count;
+	                level--;
+	                continue;
 	            }
 
 	            double ratio =
@@ -675,6 +677,36 @@ public class MakeKimGdpsTropImage {
 	    }
 
 	    return count;
+	}
+	
+	private float findNearestValid(float[][] src, int rows, int cols, int k, int l, int maxRadius) {
+
+	    for(int r=1 ; r<=maxRadius ; r++) {
+
+	        for(int dy=-r ; dy<=r ; dy++) {
+	            for(int dx=-r ; dx<=r ; dx++) {
+
+	                if(Math.abs(dx) != r && Math.abs(dy) != r) {
+	                    continue; // 테두리만 검사
+	                }
+
+	                int yy = k + dy;
+	                int xx = l + dx;
+
+	                if(yy < 0 || yy >= rows || xx < 0 || xx >= cols) {
+	                    continue;
+	                }
+
+	                float v = src[yy][xx];
+
+	                if(!Float.isNaN(v)) {
+	                    return v;
+	                }
+	            }
+	        }
+	    }
+
+	    return Float.NaN;
 	}
 	
 	private float[][] fillNaN(float[][] src, int rows, int cols) {
@@ -909,6 +941,6 @@ public class MakeKimGdpsTropImage {
 	
 	public static void main(String[] args) {
 
-		new MakeKimGdpsTropImage().process();
+		new MakeKimGdpsNe57TropImage().process();
 	}
 }
