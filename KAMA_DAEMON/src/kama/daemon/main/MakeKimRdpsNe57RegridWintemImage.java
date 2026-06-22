@@ -6,11 +6,14 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.io.PrintWriter;
 import java.nio.FloatBuffer;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
@@ -30,6 +33,12 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.net.PrintCommandListener;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 
 import kama.daemon.common.db.DatabaseManager;
 import kama.daemon.common.util.DaemonSettings;
@@ -119,6 +128,66 @@ public class MakeKimRdpsNe57RegridWintemImage {
 		
 		return true;
 	}
+	
+	private void sendFileToAcom(List<Map<String, Object>> fileInfoList) {
+    	
+    	System.out.println("INFO : Start Send Wintem Image Files");
+    	
+    	String host = "172.26.56.11";
+    	String user = "kama";
+    	String pwd = "kama1357!";
+    	
+    	try {
+    		
+    		FTPClient ftp = new FTPClient();
+    		
+    		ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));    		    		
+    		ftp.connect(host);
+    		int reply = ftp.getReplyCode();
+    			
+    		if(!FTPReply.isPositiveCompletion(reply)) {
+    			ftp.disconnect();
+    			throw new Exception("Exception in connecting to FTP Server");
+    		}
+    		
+    		ftp.login(user, pwd);
+    		ftp.setFileType(FTP.BINARY_FILE_TYPE);
+    		ftp.enterLocalPassiveMode();
+  
+    		Calendar cal = new GregorianCalendar();
+    		//cal.setTime(processorInfo.FileDateFromNameOriginal);
+    		
+        	for(int i=0 ; i<fileInfoList.size() ; i++) {
+        		
+        		Map<String, Object> fileInfo = fileInfoList.get(i);
+        		
+        		File imgFile = (File)fileInfo.get("imageFile"); 
+        		File xmlFile = (File)fileInfo.get("xmlFile");
+        		
+        		String wintemImgFileName = imgFile.getName();
+        		String wintemXmlFileName = xmlFile.getName();
+        		
+        		String ftpImgFileName = wintemImgFileName.replaceAll("WINTEM_KIM_RDPS_NOR", "LOW_WINTEM");
+        		String ftpXmlFileName = wintemXmlFileName.replaceAll("WINTEM_KIM_RDPS_NOR", "LOW_WINTEM");
+        		        		
+        		try(InputStream input = new FileInputStream(imgFile)) {
+        			ftp.storeFile("/RCVD/KAMA/" + ftpImgFileName, input);
+        		}
+        		
+        		try(InputStream input = new FileInputStream(xmlFile)) {
+        			ftp.storeFile("/RCVD/KAMA/" + ftpXmlFileName, input);
+        		}
+        	}
+        	
+        	ftp.logout();
+        	ftp.disconnect();
+    		
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    	System.out.println("INFO : End Send Wintem Image Files");
+    }
 	
 	private void initCoordinates() {
 		
@@ -341,6 +410,7 @@ public class MakeKimRdpsNe57RegridWintemImage {
 		        paramMap1.put("wintemBaseImg", "wintem_base2_upscaled.png");
 		        
 		        this.generateImage(ncFile, fileName, savePath, paramMap1);		
+		        sendFileToAcom(fileInfoList);
 		        
 //		        // 위기상태 이미지 생성
 		        Map<String, String> paramMap2 = new HashMap<String, String>();

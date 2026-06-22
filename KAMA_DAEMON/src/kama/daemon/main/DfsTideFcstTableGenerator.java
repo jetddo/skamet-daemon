@@ -388,7 +388,7 @@ public class DfsTideFcstTableGenerator {
 
 			// 기상요소 텍스트
 			this.setCellText("강수량", g, layout.marginLeft + layout.regionColW, rowY - headerFont.getSize() + headerFont.getSize() / 3, layout.elementColW, layout.rainRowH, headerFont);
-			this.setCellText("(" + dfsPointName + ")", g, layout.marginLeft + layout.regionColW + headerFont.getSize() / 3, rowY + headerFont.getSize() / 2, layout.elementColW, layout.rainRowH, headerFont);
+			//this.setCellText("(" + dfsPointName + ")", g, layout.marginLeft + layout.regionColW + headerFont.getSize() / 3, rowY + headerFont.getSize() / 2, layout.elementColW, layout.rainRowH, headerFont);
 
 			this.setCellText("조위", g, layout.marginLeft + layout.regionColW, rowY + layout.rainRowH - headerFont.getSize(), layout.elementColW, layout.tideRowH, headerFont);
 			this.setCellText("(" + tidePointName + ")", g, layout.marginLeft + layout.regionColW + headerFont.getSize() / 3, rowY + layout.rainRowH + headerFont.getSize(), layout.elementColW, layout.tideRowH, headerFont);
