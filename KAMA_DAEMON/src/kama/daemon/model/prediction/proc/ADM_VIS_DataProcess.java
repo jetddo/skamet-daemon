@@ -22,9 +22,9 @@ import ucar.nc2.dataset.NetcdfDataset;
 /**
  * Created by chlee on 2017-02-15.
  */
-public class LOOW_DataProcess extends DataProcessor
+public class ADM_VIS_DataProcess extends DataProcessor
 {
-    private static final String DATAFILE_PREFIX = "loow";
+    private static final String DATAFILE_PREFIX = "adm_vis";
     private static final int DB_COLUMN_COUNT = 2;
     private static final int FILE_DATE_INDEX_POS = 2; // 20170101/visibility.nc
     private static final int[] DB_PRIMARY_KEY_INDEXES = { 0 }; // COL
@@ -32,7 +32,7 @@ public class LOOW_DataProcess extends DataProcessor
     private final int INSERT_QUERY_2 = 2;
     private final int DELETE_QUERY = 3;
 
-    public LOOW_DataProcess(DaemonSettings settings)
+    public ADM_VIS_DataProcess(DaemonSettings settings)
     {
         super(settings, DATAFILE_PREFIX);
         

@@ -24,7 +24,7 @@ import ucar.nc2.dataset.NetcdfDataset;
  */
 public class KIMA_DataProcess extends DataProcessor
 {
-    private static final String DATAFILE_PREFIX = "loow";
+    private static final String DATAFILE_PREFIX = "kima";
     private static final int DB_COLUMN_COUNT = 2;
     private static final int FILE_DATE_INDEX_POS = 2; // 20170101/visibility.nc
     private static final int[] DB_PRIMARY_KEY_INDEXES = { 0 }; // COL
