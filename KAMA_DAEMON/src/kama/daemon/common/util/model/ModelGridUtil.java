@@ -43,6 +43,8 @@ public class ModelGridUtil {
 		KIM_GDPS,
 		KIM_RDPS,
 		KIM_RDPS_NE57,
+		KIM_LDPS_NE57,
+		KIM_LENS_NE57,
 		GKTG_ARCV,
 		HOBS_RKSI,
 		HOBS_RKPC,
@@ -314,6 +316,20 @@ public class ModelGridUtil {
 			
 			this.modelWidth = 1050;
 			this.modelHeight = 840;
+	
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KIM_LDPS_NE57.equals(model)) {
+			
+			this.modelWidth = 1176;
+			this.modelHeight = 1536;
+	
+			this.byteOrder = ByteOrder.BIG_ENDIAN;
+			
+		} else if(Model.KIM_LENS_NE57.equals(model)) {
+			
+			this.modelWidth = 628;
+			this.modelHeight = 590;
 	
 			this.byteOrder = ByteOrder.BIG_ENDIAN;
 			
