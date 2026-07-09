@@ -33,15 +33,15 @@ import ucar.ma2.Range;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
-public class MakeKimLdpsNe57RegridBinary {
+public class MakeKimLensNe57RegridBinary {
 	
 	private SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	
-	private String[] kimLdpsModelDirPatterns = new String[]{"[0-9]{4}", "[0-9]{2}", "[0-9]{2}", "[0-9]{2}"};
+	private String[] kimLensModelDirPatterns = new String[]{"[0-9]{4}", "[0-9]{2}", "[0-9]{2}", "[0-9]{2}"};
 		
-	private final String insertKimLdpsProcInfo = 
+	private final String insertKimLensProcInfo = 
 			
-			" INSERT INTO AAMI.KIM_LDPS_REGRID_PROC_INFO(ISSUED_DT, FCST_DT, MODEL_TYPE, PROC_TM) VALUES " + 
+			" INSERT INTO AAMI.KIM_LENS_REGRID_PROC_INFO(ISSUED_DT, FCST_DT, MODEL_TYPE, PROC_TM) VALUES " + 
 			" (TO_DATE(''{0}'', ''YYYYMMDDHH24''), TO_DATE(''{1}'', ''YYYYMMDDHH24''), ''{2}'', SYSDATE) "; 
 		
 	private Configuration config;
@@ -73,7 +73,7 @@ public class MakeKimLdpsNe57RegridBinary {
 			
 		} catch (ConfigurationException e ) {
 			
-			System.out.println("Error : KimLdpsRegridBinaryGenerator.initialize -> " + e);
+			System.out.println("Error : KimLensRegridBinaryGenerator.initialize -> " + e);
 			
 			this.dbManager.safeClose();
 			
@@ -85,12 +85,12 @@ public class MakeKimLdpsNe57RegridBinary {
 	
 	private void initCoordinates() {
 		
-		System.out.println("KimLdpsRegridBinaryGenerator [ Initailize Coordinate Systems ]");
+		System.out.println("KimLensRegridBinaryGenerator [ Initailize Coordinate Systems ]");
 		
-		String coordinatesLatPath = this.config.getString("kim_ldps_ne57.coordinates.lat.path");
-		String coordinatesLonPath = this.config.getString("kim_ldps_ne57.coordinates.lon.path");
+		String coordinatesLatPath = this.config.getString("kim_lens_ne57.coordinates.lat.path");
+		String coordinatesLonPath = this.config.getString("kim_lens_ne57.coordinates.lon.path");
 		
-		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_LDPS_NE57, null, coordinatesLatPath, coordinatesLonPath);
+		this.modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_LENS_NE57, null, coordinatesLatPath, coordinatesLonPath);
 		
 		double[] mapBound = new double[]{50, 20, 110, 150};
 		
@@ -107,11 +107,11 @@ public class MakeKimLdpsNe57RegridBinary {
 	
 	private void readRegridInfo() {
 		
-		System.out.println("\t-> Read KimLdps Regrid Info");
+		System.out.println("\t-> Read KimLens Regrid Info");
 		
 		this.regridInfo = new HashMap<String, String>();
 		
-		File regridInfoFile = new File(String.format("%s/%s", DaemonSettings.getCurrentWorkingDirectory(), "res/kim_ldps_ne57_regrid_info.txt"));
+		File regridInfoFile = new File(String.format("%s/%s", DaemonSettings.getCurrentWorkingDirectory(), "res/kim_lens_ne57_regrid_info.txt"));
 		
 		try {
 			
@@ -142,7 +142,7 @@ public class MakeKimLdpsNe57RegridBinary {
 		
 		if(!this.initialize()) {
 			
-			System.out.println("Error : KimLdpsRegridBinaryGenerator.process -> initialize failed");
+			System.out.println("Error : KimLensRegridBinaryGenerator.process -> initialize failed");
 			return;
 		}
 		
@@ -161,8 +161,8 @@ public class MakeKimLdpsNe57RegridBinary {
 			
 			Date startTm = cal.getTime();	
 			
-			//this.processKimLdpsModel(storePath + File.separator + "KIM_LDPS_UNIS_NE57", startTm);
-			this.processKimLdpsModel(storePath + File.separator + "KIM_LDPS_NE57", startTm);
+			this.processKimLensModel(storePath + File.separator + "KIM_LENS_UNIS_NE57", startTm);
+			this.processKimLensModel(storePath + File.separator + "KIM_LENS_NE57", startTm);
 			
 		} catch (Exception e) {
 			
@@ -171,7 +171,7 @@ public class MakeKimLdpsNe57RegridBinary {
 		this.destroy();
 	}
 	
-	private void processKimLdpsModel(String storePath, Date startTm) {
+	private void processKimLensModel(String storePath, Date startTm) {
 		
 		File rootDir = new File(storePath);
 		
@@ -179,22 +179,22 @@ public class MakeKimLdpsNe57RegridBinary {
 			return;
 		}
 		
-		fetchKimLdpsRecursive(rootDir, startTm, 0);
+		fetchKimLensRecursive(rootDir, startTm, 0);
 	}
 	
-	private void fetchKimLdpsRecursive(final File baseDir, Date startTm, int depth) {
+	private void fetchKimLensRecursive(final File baseDir, Date startTm, int depth) {
 		
 		File[] dirs = baseDir.listFiles();
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
 		
-		String pattern = this.kimLdpsModelDirPatterns[depth];
+		String pattern = this.kimLensModelDirPatterns[depth];
 		
 		for(File dir : dirs) {
 			
 			if(dir.isDirectory() && dir.getName().matches(pattern)) {	
 				
-				if(depth == this.kimLdpsModelDirPatterns.length-1) {
+				if(depth == this.kimLensModelDirPatterns.length-1) {
 					
 					try {
 						
@@ -207,12 +207,12 @@ public class MakeKimLdpsNe57RegridBinary {
 							continue;
 						}
 						
-						File[] kimLdpsModelFiles = dir.listFiles(new FilenameFilter() {
+						File[] kimLensModelFiles = dir.listFiles(new FilenameFilter() {
 							
 							@Override
 							public boolean accept(File dir, String name) {
 								
-								if(name.matches("l010_v040_korea_(prs|etc).2byte.ft[0-9]{3}.[0-9]{10}.nc")) {
+								if(name.matches("l030_v040_m01_korea_(prs|etc).2byte.ft[0-9]{3}.[0-9]{10}.nc")) {
 									return true;
 								}
 								
@@ -220,25 +220,25 @@ public class MakeKimLdpsNe57RegridBinary {
 							}
 						});
 						
-						for(int i=0 ; i<kimLdpsModelFiles.length ; i++) {
+						for(int i=0 ; i<kimLensModelFiles.length ; i++) {
 							
-							String modelType = kimLdpsModelFiles[i].getName().indexOf("etc") >= 0 ? "unis" : "pres";
+							String modelType = kimLensModelFiles[i].getName().indexOf("etc") >= 0 ? "unis" : "pres";
 							
-							int fcstHour = Integer.valueOf(kimLdpsModelFiles[i].getName().split("\\.")[2].replaceAll("ft", ""));
+							int fcstHour = Integer.valueOf(kimLensModelFiles[i].getName().split("\\.")[2].replaceAll("ft", ""));
 								
-							String savePath = kimLdpsModelFiles[i].getAbsolutePath().replaceAll(kimLdpsModelFiles[i].getName(), "");
+							String savePath = kimLensModelFiles[i].getAbsolutePath().replaceAll(kimLensModelFiles[i].getName(), "");
 							
 							if("unis".equals(modelType)) {
-								savePath = savePath.replaceAll("KIM_LDPS_UNIS_NE57", "KIM_LDPS_UNIS_NE57_BIN");
+								savePath = savePath.replaceAll("KIM_LENS_UNIS_NE57", "KIM_LENS_UNIS_NE57_BIN");
 							} else {
-								savePath = savePath.replaceAll("KIM_LDPS_NE57", "KIM_LDPS_NE57_BIN");
+								savePath = savePath.replaceAll("KIM_LENS_NE57", "KIM_LENS_NE57_BIN");
 							}
 							
 							if(!new File(savePath).exists()) {
 								new File(savePath).mkdirs();
 							}
 							
-							this.generateBinary(kimLdpsModelFiles[i], modelType, issuedDt, fcstHour, savePath);
+							this.generateBinary(kimLensModelFiles[i], modelType, issuedDt, fcstHour, savePath);
 							
 						}						
 						
@@ -246,8 +246,8 @@ public class MakeKimLdpsNe57RegridBinary {
 						
 					}
 					
-				} else if(depth < this.kimLdpsModelDirPatterns.length-1) {
-					fetchKimLdpsRecursive(dir, startTm, depth+1);
+				} else if(depth < this.kimLensModelDirPatterns.length-1) {
+					fetchKimLensRecursive(dir, startTm, depth+1);
 				}
 			}
 		}
@@ -269,14 +269,13 @@ public class MakeKimLdpsNe57RegridBinary {
 			if("unis".equals(modelType)) {
 				
 				settings = new String[][]{
-					{"U10", "u"},
-					{"V10", "v"}
+					{"VIS", "vis"}
 				};				
 				
 			} else {
 				
 				settings = new String[][]{
-					{"T-TD", "ttd"}		
+
 				};
 			}
 			
@@ -297,19 +296,10 @@ public class MakeKimLdpsNe57RegridBinary {
 					generateUnisBinaryFile(ncFile, savePath, modelType, layerName, aliasName, issuedDt, cal.getTime());
 					
 					break;
-					
-				case "pres":
-					
-					if ("T-TD".equals(layerName)) {
-						
-						generatePresTtdBinaryFile(ncFile, savePath, modelType, layerName, aliasName, issuedDt, cal.getTime());
-					}
-
-					break;
 				}
 			}
 			
-			String query = MessageFormat.format(this.insertKimLdpsProcInfo, new Object[]{
+			String query = MessageFormat.format(this.insertKimLensProcInfo, new Object[]{
 				sdf.format(issuedDt), sdf.format(cal.getTime()), modelType	
 			});
 			
@@ -347,7 +337,7 @@ public class MakeKimLdpsNe57RegridBinary {
 		
 		float[][] regridValues = (float[][])regridData.get("regridValues");
 		
-		String binaryFileName = savePath + File.separator + "kim_ldps_" + modelType + "_ne57_regrid_" + aliasName + "_" + (sdf.format(issuedDt)) +  "_" + (sdf.format(fcstDt)) + "_00.bin";
+		String binaryFileName = savePath + File.separator + "kim_lens_" + modelType + "_ne57_regrid_" + aliasName + "_" + (sdf.format(issuedDt)) +  "_" + (sdf.format(fcstDt)) + "_00.bin";
 		
 		System.out.println("\t\t-> Write Binary [" + binaryFileName + "]");
 		
@@ -360,65 +350,6 @@ public class MakeKimLdpsNe57RegridBinary {
 		}
 		
 		dos.close();
-	}
-	
-	private void generatePresTtdBinaryFile(NetcdfDataset ncFile, String savePath, String modelType, String layerName, String aliasName, Date issuedDt, Date fcstDt) throws Exception {
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
-		
-		BoundLonLat boundLonLat = this.modelGridUtil.getBoundLonLat();			
-		BoundXY boundXY = this.modelGridUtil.getBoundXY();
-		
-		int rows = this.modelGridUtil.getRows();
-		int cols = this.modelGridUtil.getCols();
-		
-		double[] plev = new double[] {1000, 925, 850, 700};
-		int[] plevIndex = new int[] {0, 3, 6, 9};
-		
-		for(int i=0 ; i<plevIndex.length ; i++) {
-			
-			double p = plev[i];
-			int pIndex = plevIndex[i];
-			
-			Variable rhVar = ncFile.findVariable("RH");
-			Variable tVar = ncFile.findVariable("T");
-			
-			List<Range> rangeList = new ArrayList<Range>();
-			rangeList.add(new Range(0, 0));				
-			rangeList.add(new Range(pIndex, pIndex));				
-			rangeList.add(new Range(boundXY.getBottom(), boundXY.getTop()));
-			rangeList.add(new Range(boundXY.getLeft(), boundXY.getRight()));
-			
-			float[][] rhValues = GridCalcUtil.convertStorageToPrimitiveValuesFromAttr(rhVar, rhVar.read(rangeList).getStorage(), rows, cols);
-			float[][] tValues = GridCalcUtil.convertStorageToPrimitiveValuesFromAttr(tVar, tVar.read(rangeList).getStorage(), rows, cols);
-			
-			float[][] values = new float[rows][];
-			
-			for (int j = 0; j < rows; j++) {
-				values[j] = new float[cols];
-				for (int k = 0; k < cols; k++) {
-					values[j][k] = (float) this.calculateTTd(p, rhValues[j][k], tValues[j][k]);
-				}
-			}
-			
-			Map<String, Object> regridData = this.getRegridData(values, boundLonLat, rows, cols);
-			
-			float[][] regridValues = (float[][])regridData.get("regridValues");
-			
-			String binaryFileName = savePath + File.separator + "kim_ldps_" + modelType + "_ne57_regrid_" + aliasName + "_" + (sdf.format(issuedDt)) +  "_" + (sdf.format(fcstDt)) + "_" + String.format("%02d", i)  + ".bin";
-			
-			System.out.println("\t\t-> Write Binary [" + binaryFileName + "]");
-			
-			BufferedOutputStream dos = new BufferedOutputStream(new FileOutputStream(binaryFileName));
-			
-			for(int k=0 ; k<rows ; k++) {						
-				for(int l=0 ; l<cols ; l++) {								
-					dos.write(ByteBuffer.allocate(4).putFloat(regridValues[k][l]).array());
-				}
-			}
-			
-			dos.close();
-		}
 	}
 	
 	private Map<String, Object> getRegridData(float[][] values, BoundLonLat maxBoundLonLat, int rows, int cols) {
@@ -495,24 +426,8 @@ public class MakeKimLdpsNe57RegridBinary {
 		return regridData;
 	}
 	
-	private double calculateTTd(double pres, double rh, double t) {
-
-		double eps = 0.622, ezero = 6.112, eslcon1 = 17.67, eslcon2 = 29.65, celkel = 273.15;
-		double rhval = rh;
-		if (rhval == 0.0)
-			rhval = 0.1;
-		double tmp = t;
-		double pevaps = 6.11 * Math.exp(17.67 * (tmp - 273.15) / (tmp - 29.65));
-		double shums = (0.622 * pevaps) / (pres - pevaps);
-		double shumi = rhval * shums / 100.;
-
-		double pelog = Math.log(shumi * pres / (eps + shumi) / ezero);
-
-		return tmp - (eslcon2 * pelog - eslcon1 * celkel) / (pelog - eslcon1);
-	}
-	
 	public static void main(String[] args) {
 
-		new MakeKimLdpsNe57RegridBinary().process();
+		new MakeKimLensNe57RegridBinary().process();
 	}
 }

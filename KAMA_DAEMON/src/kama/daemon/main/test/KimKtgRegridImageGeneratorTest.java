@@ -27,7 +27,7 @@ import ucar.ma2.Range;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 
-public class KimKtgNe57RegridImageGeneratorTest {
+public class KimKtgRegridImageGeneratorTest {
 	
 	
 	private ModelGridUtil modelGridUtil;
@@ -42,7 +42,7 @@ public class KimKtgNe57RegridImageGeneratorTest {
 	private FloatBuffer latitudeBuffer;
 	private FloatBuffer longitudeBuffer;
 	
-	public KimKtgNe57RegridImageGeneratorTest() {
+	public KimKtgRegridImageGeneratorTest() {
 		
 			
 		this.initCoordinates();
@@ -292,12 +292,12 @@ public class KimKtgNe57RegridImageGeneratorTest {
 	
 	public static void main(String[] args) {
         
-		KimKtgNe57RegridImageGeneratorTest kimKtgImageGeneratorTest = new KimKtgNe57RegridImageGeneratorTest();
+		KimKtgRegridImageGeneratorTest kimKtgImageGeneratorTest = new KimKtgRegridImageGeneratorTest();
                   
 		try {
 						
-			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/data/datastore/KIM_KTG/2026/03/18/00/amo_kimg_ktgm_midl_f00_2026031800.nc", null);
-			String fileName = "amo_kimg_ktgm_midl_f00_2026031800.nc";
+			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:\\data\\datastore\\KIM_KTG\\2026\\04\\28\\00\\amo_gdps_ktgm_midl_f06_2026042800.nc", null);
+			String fileName = "amo_gdps_ktgm_midl_f06_2026042800.nc";
 	        String savePath = "F:/data/kim_ktg_regrid_img";
 	        
 	        kimKtgImageGeneratorTest.generateImages(ncFile, fileName, savePath);
