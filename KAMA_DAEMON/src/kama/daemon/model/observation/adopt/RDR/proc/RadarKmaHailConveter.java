@@ -164,12 +164,25 @@ public class RadarKmaHailConveter {
 	private Color getColor(float data) {
 		
 		Color color = null;
-		
-		if(data > -999) {
-			return new Color(0,255,0);
-		} else {
-			return null;
+		 
+		switch((int)data) {
+		 
+		case 1:
+			color = new Color(176,224,230);
+			break;
+		case 2:
+			color = new Color(240,230,140);
+			break;
+		case 3:
+			color = new Color(255,69,0);
+			break;
+		case 4:
+			color = new Color(128,0,128);
+			break;
+		 
 		}
+		 
+		return color;
 	}
 	
 	private void createImage(float[][] radarLayerRegridData, String fileName, int index) {
