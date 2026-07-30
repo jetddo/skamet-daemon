@@ -816,7 +816,7 @@ public class KimAcimSectorTableVer2Generator {
 			Date issuedTm = sdf.parse(issuedTmStr);
 			Calendar cal = new GregorianCalendar();
 
-			this.createFrameInfo(g, width, height, issuedTm);
+			this.createFrameInfo(g, width, height, issuedTm, dataType);
 
 			System.out.println("\n::: Start Generate Sector Table :::");
 			System.out.println("-> Issued Time: " + sdf3.format(issuedTm) + ", Model File Count: " + modelFileList.size());
@@ -1155,7 +1155,7 @@ public class KimAcimSectorTableVer2Generator {
 		return "FL" + String.format("%03d", min / 100) + "~FL" + String.format("%03d", max / 100);
 	}
 	
-	private void createFrameInfo(Graphics2D g, int width, int height, Date issuedTm) {
+	private void createFrameInfo(Graphics2D g, int width, int height, Date issuedTm, int dataType) {
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일 HHmm");
 		
@@ -1195,12 +1195,18 @@ public class KimAcimSectorTableVer2Generator {
         
         g.drawLine(leftMargin + logoSize, topMargin + titleHeight, width - rightMargin, topMargin + titleHeight); // 제목/발표정보 구분선
 		
-        Font titleFont = this.getFont(35, true);
+        Font titleFont = this.getFont(30, true);
         Font infoFont = this.getFont(20, true);
         g.setFont(titleFont);
         g.setColor(Color.BLACK);
         
-        String titleText = "대류운 예측 정보";
+        String titleText = "";
+        
+        if(dataType == 1) {
+        	titleText = "대류운 예측 정보 (섹터)";
+        } else if(dataType == 2) {
+        	titleText = "대류운 예측 정보 (항로)";
+        } 
         
         g.drawString(titleText, this.getCellTextLeftMargin(titleText, g, width)+50, topMargin + titleFont.getSize() + 10); // 제목 표시
         
@@ -1406,7 +1412,7 @@ public class KimAcimSectorTableVer2Generator {
 						
 						validCount++;
 						
-						if (value >= areaThresholdMin && value <= areaThresholdMax) {
+						if (value > areaThresholdMin && value <= areaThresholdMax) {
 							thresholdCount++;
 						}
 					}
