@@ -155,8 +155,8 @@ public class MakeKimKtgRegridBinary {
 		
 		try {
 
-//			cal.setTime(new Date());
-			cal.setTime(sdf.parse("2026042812"));
+			cal.setTime(new Date());
+//			cal.setTime(sdf.parse("2026042812"));
 			cal.add(Calendar.HOUR_OF_DAY, -24);
 			
 			Date startTm = cal.getTime();	
