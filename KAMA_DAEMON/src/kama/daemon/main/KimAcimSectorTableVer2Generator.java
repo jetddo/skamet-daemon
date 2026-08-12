@@ -92,7 +92,7 @@ public class KimAcimSectorTableVer2Generator {
 		{ { "동해 Y697·Y437" } }, 
 		{ { "포항 Y685" } }, 
 		{ { "대구 Y782·Z83" } }, 
-		{ { "남해 Y752·Y511" } }, 
+		{ { "남해 Y571·Y572" } }, 
 		{ { "군산 Y711·Y722" } }, 
 		{ { "광주 Y711·Y722" } }, 
 		{ { "RUGMA→GUKDO" } }
@@ -1097,7 +1097,7 @@ public class KimAcimSectorTableVer2Generator {
 			g.setColor(Color.BLACK);
 			g.drawRect(tableLeftMargin, tableTopMargin, tableWidth, tableHeight);
 
-			this.createLegend(g, width, height, tableRightMargin, legendFont);
+			this.createLegend(g, width, height, tableRightMargin, legendFont, dataType);
 
 			g.dispose();
 
@@ -1218,7 +1218,7 @@ public class KimAcimSectorTableVer2Generator {
 		
 	}
 	
-	private void createLegend(Graphics2D g, int width, int height, int tableRightMargin, Font font) {
+	private void createLegend(Graphics2D g, int width, int height, int tableRightMargin, Font font, int dataType) {
 
 	    String[] thresholds = { "10~19", "20~29", "30~39", "40~49", "50~" };
 
@@ -1236,9 +1236,14 @@ public class KimAcimSectorTableVer2Generator {
 	    int legendLeftMargin = width - legendWidth - tableRightMargin;
 
 	    // 이미지 하단 기준으로 고정
-	    int legendBottomMargin = 80;
-	    int legendTopMargin = height - legendBottomMargin - legendHeight;
+	    int legendBottomMargin = 75;	    
 
+	    if(dataType == 2) {
+	    	legendBottomMargin = 195;
+	    }
+	    
+	    int legendTopMargin = height - legendBottomMargin - legendHeight;
+	
 	    int cellWidth = legendWidth / thresholds.length;
 	    int cellExtraWidth = legendWidth % thresholds.length;
 	    int cellHeight = legendHeight;
