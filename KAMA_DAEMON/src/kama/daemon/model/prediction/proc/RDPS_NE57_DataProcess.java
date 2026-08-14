@@ -85,7 +85,7 @@ public class RDPS_NE57_DataProcess extends DataProcessor
 					pres
     			}).replaceAll("'null'", "null");
                 
-                dbManager.executeUpdate(query);
+                dbManager.executeUpdate(query, false);
 			}
 			
 			br.close();

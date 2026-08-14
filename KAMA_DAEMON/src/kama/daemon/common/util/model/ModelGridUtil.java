@@ -119,7 +119,7 @@ public class ModelGridUtil {
 	private double[] lonInterval;
 	
 	// 밀려있는 경도
-	private int lonShift = 0;
+	private double lonShift = 0;
 	
 	// 폴리곤 정보
 	private List<Map<String, Object>> polygonDataList = new ArrayList<Map<String, Object>>();
@@ -490,11 +490,13 @@ public class ModelGridUtil {
 		this.lonBuffer = this.getGridBuffer(lonPath);
 	}
 	
-	public ModelGridUtil(Model model, Position position, String latPath, String lonPath, int lonShift) {
-				
+	public ModelGridUtil(Model model, Position position, String latPath, String lonPath, double lonShiftRatio) {
+		
 		this(model, position, latPath, lonPath);
 		
-		this.lonShift = lonShift;
+		if(this.defaultLonInterval != 0) {
+			this.lonShift = this.defaultLonInterval * lonShiftRatio;
+		}
 	}
 		
 	private FloatBuffer getGridBuffer(String fileName) {
