@@ -494,8 +494,17 @@ public class ModelGridUtil {
 		
 		this(model, position, latPath, lonPath);
 		
-		if(this.defaultLonInterval != 0) {
+		if(this.defaultLonInterval != 0d) {
 			this.lonShift = this.defaultLonInterval * lonShiftRatio;
+		}
+	}
+	
+	public ModelGridUtil(Model model, Position position, String latPath, String lonPath, double lonShiftRatio, int lonShift) {
+		
+		this(model, position, latPath, lonPath);
+		
+		if(this.defaultLonInterval != 0d) {
+			this.lonShift = this.defaultLonInterval * lonShiftRatio + lonShift;
 		}
 	}
 		

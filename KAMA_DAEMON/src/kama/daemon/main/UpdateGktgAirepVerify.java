@@ -64,7 +64,7 @@ public class UpdateGktgAirepVerify {
 			String coordinatesLatPath = this.config.getString("kim_gktg.coordinates.lat.path");
 			String coordinatesLonPath = this.config.getString("kim_gktg.coordinates.lon.path");
 			
-			modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GDPS, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath, 180);
+			modelGridUtil = new ModelGridUtil(ModelGridUtil.Model.KIM_GDPS, ModelGridUtil.Position.MIDDLE_CENTER, coordinatesLatPath, coordinatesLonPath, 0, 180);
 			
 			this.dbManager = DatabaseManager.getInstance();
 			this.dbManager.setConfig(new DaemonSettings(this.config));
