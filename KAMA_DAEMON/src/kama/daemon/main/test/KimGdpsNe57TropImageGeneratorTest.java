@@ -742,7 +742,7 @@ public class KimGdpsNe57TropImageGeneratorTest {
 	        
 	        kimGdpsImageGeneratorTest.generateImages(ncFile, fileName, savePath);
 	        
-			
+			ncFile.close();
 			
 		} catch (Exception e) {
 			

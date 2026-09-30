@@ -301,20 +301,11 @@ public class GridCalcUtil {
 		
 	    float[] values = convertStorageToPrimitiveValues(storage);
 	    
-	    // NetcdfDataset(acquireDataset 등)으로 읽은 VariableDS이고
-	    // scale_factor / add_offset enhancement가 적용되는 변수라면
-	    // read() 단계에서 이미 변환되므로 수동 적용하지 않음
-	    if (var instanceof VariableDS) {
-	        VariableDS vds = (VariableDS) var;
-
-	        if (vds.hasScaleOffset()) {	        	
-	        	System.out.println("[GridCalcUtil]: Scale/Offset already applied for variable: " + var.getFullName());	        	
-	            return values;
-	        }
-	    }
+		if (GridCalcUtil.checkScaleOffsetApplied(var)) {
+			return values;
+		}	 
 
 	    // 일반 Variable(openNetcdfFile 등)은 기존처럼 직접 적용
-
 	    applyScaleOffsetFromAttr(values, var);
 
 	    return values;
@@ -323,21 +314,12 @@ public class GridCalcUtil {
 	public static float[][] convertStorageToPrimitiveValuesFromAttr(Variable var, Object storage, int rows, int cols) {
 		
 	    float[][] values = convertStorageToPrimitiveValues(storage, rows, cols);
-	    
-	    // NetcdfDataset(acquireDataset 등)으로 읽은 VariableDS이고
-	    // scale_factor / add_offset enhancement가 적용되는 변수라면
-	    // read() 단계에서 이미 변환되므로 수동 적용하지 않음
-	    if (var instanceof VariableDS) {
-	        VariableDS vds = (VariableDS) var;
 
-	        if (vds.hasScaleOffset()) {	        	
-	        	System.out.println("[GridCalcUtil]: Scale/Offset already applied for variable: " + var.getFullName());	        	
-	            return values;
-	        }
-	    }
+		if (GridCalcUtil.checkScaleOffsetApplied(var)) {
+			return values;
+		}	 
 
 	    // 일반 Variable(openNetcdfFile 등)은 기존처럼 직접 적용
-
 	    applyScaleOffsetFromAttr(values, var, rows, cols);
 
 	    return values;
@@ -346,24 +328,35 @@ public class GridCalcUtil {
 	public static float[][] convertStorageToPrimitiveValuesReverseFromAttr(Variable var, Object storage, int rows, int cols) {
 		
 	    float[][] values = convertStorageToPrimitiveValuesReverse(storage, rows, cols);
-	    
-	    // NetcdfDataset(acquireDataset 등)으로 읽은 VariableDS이고
-	    // scale_factor / add_offset enhancement가 적용되는 변수라면
-	    // read() 단계에서 이미 변환되므로 수동 적용하지 않음
-	    if (var instanceof VariableDS) {
-	        VariableDS vds = (VariableDS) var;
 
-	        if (vds.hasScaleOffset()) {	        	
-	        	System.out.println("[GridCalcUtil]: Scale/Offset already applied for variable: " + var.getFullName());	        	
-	            return values;
-	        }
-	    }
+		if (GridCalcUtil.checkScaleOffsetApplied(var)) {
+			return values;
+		}	    
 
 	    // 일반 Variable(openNetcdfFile 등)은 기존처럼 직접 적용
-
 	    applyScaleOffsetFromAttr(values, var, rows, cols);
 
 	    return values;
+	}
+	
+	public static boolean checkScaleOffsetApplied(Variable var) {
+		
+		// NetcdfDataset(acquireDataset 등)으로 읽은 VariableDS이고
+	    // scale_factor / add_offset enhancement가 적용되는 변수라면
+	    // read() 단계에서 이미 변환되므로 수동 적용하지 않음
+		if (var instanceof VariableDS) {
+			VariableDS vds = (VariableDS) var;
+			
+			boolean check = vds.hasScaleOffset();
+			
+			if(check) {
+				System.out.println("** [GridCalcUtil]: Scale/Offset already applied for variable: " + var.getFullName());
+			}
+			
+			return check;
+		}
+		
+		return false;
 	}
 	
 	private static void applyScaleOffsetFromAttr(float[][] values, Variable var, int rows, int cols) {
