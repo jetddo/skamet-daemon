@@ -18,6 +18,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import ucar.ma2.Range;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
 
 public class KimGdpsNe57ImageGeneratorTest {
 	
@@ -169,17 +170,17 @@ public class KimGdpsNe57ImageGeneratorTest {
 		KimGdpsNe57ImageGeneratorTest kimGdpsImageGeneratorTest = new KimGdpsNe57ImageGeneratorTest();
                   
 		try {
-						
-			NetcdfFile ncFile = NetcdfFile.open("F:/KAMA_AAMI/2026/항기청_수신/항기청_수신_20260514/g576_v091_glob_prs.2byte.ft000.2026050100.nc");
-			String fileName = "g576_v091_glob_prs.2byte.ft000.2026050100.nc";
+			
+			NetcdfDataset ncFile = NetcdfDataset.acquireDataset("F:/data/datastore/KIM_GDPS_NE57/2026/05/19/00/g576_v091_glob_prs.2byte.ft000.2026051000.nc", null);
+			String fileName = "g576_v091_glob_prs.2byte.ft000.2026051000.nc";
 	        String savePath = "F:/data";
 	        
 	        kimGdpsImageGeneratorTest.generateImages(ncFile, fileName, savePath);
 	        
-			
+	        ncFile.close();
 			
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 		
 		

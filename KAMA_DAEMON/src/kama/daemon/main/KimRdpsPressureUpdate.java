@@ -30,8 +30,8 @@ import kama.daemon.common.util.model.ModelGridUtil;
 import kama.daemon.common.util.model.PointXY;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
 
 public class KimRdpsPressureUpdate {
 	
@@ -281,7 +281,7 @@ public class KimRdpsPressureUpdate {
 					
 					System.out.println(logDateFormat.format(new Date(System.currentTimeMillis())) + "\t\t -> Target KIM RDPS File : " + kimRdpsFiles[j].getAbsolutePath());
 					
-					NetcdfFile ncFile = NetcdfFile.open(kimRdpsFiles[j].getAbsolutePath());
+					NetcdfDataset ncFile = NetcdfDataset.acquireDataset(kimRdpsFiles[j].getAbsolutePath(), null);
 					
 					String[] variableNames = new String[]{"Pressure_msl"};
 				

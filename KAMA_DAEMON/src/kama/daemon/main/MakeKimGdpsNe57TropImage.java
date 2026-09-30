@@ -34,6 +34,7 @@ import net.coobird.thumbnailator.resizers.configurations.Antialiasing;
 import ucar.ma2.Range;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
 
 public class MakeKimGdpsNe57TropImage {
 	
@@ -253,7 +254,7 @@ public class MakeKimGdpsNe57TropImage {
 			
 			try {
 				
-				NetcdfFile ncFile = NetcdfFile.open(kimGdpsFile.getAbsolutePath());
+				NetcdfDataset ncFile = NetcdfDataset.acquireDataset(kimGdpsFile.getAbsolutePath(), null);
 				String fileName = kimGdpsFile.getName();
 								
 				Date fileDt = sdf2.parse(fileName.split("\\.")[3]);
