@@ -627,86 +627,108 @@ public class MakeKimRdpsNe57RegridWintemImage {
 				ig2.dispose();
 				ig2 = null;
 				///////////////////////////////////////////////////////////////////////////////////
-				
+
 				System.out.println();
-				
+
 				String xmlFileName = imgFileName.replace("jpg", "xml");
-				
+
 				File xmlFile = new File(savePath + File.separator + xmlFileName);
-				
+
 				System.out.println("\t\t-> Start Write Xml [" + xmlFile.getAbsolutePath() + "]");
-				
+
 				fileInfo.put("xmlFile", xmlFile);
-				
+
 				FileWriter writer = new FileWriter(xmlFile);
-				
+
 				XMLStreamWriter xmlwriter = factory.createXMLStreamWriter(writer);
-				
+
 				xmlwriter.writeStartDocument();
-			    
-			    xmlwriter.writeStartElement("wintem");
-			    
-			    xmlwriter.writeAttribute("model", "kim_rdps");
-			    xmlwriter.writeAttribute("timezone", "utc");
-			    xmlwriter.writeAttribute("issued_dt", new SimpleDateFormat("yyyyMMddHH").format(issuedDt));
-			    xmlwriter.writeAttribute("fcst_dt", new SimpleDateFormat("yyyyMMddHH").format(fcstDt));
-			    xmlwriter.writeAttribute("height", "FL"+heightText);
-			    xmlwriter.writeAttribute("ws_unit", "knot");
-			    xmlwriter.writeAttribute("wd_unit", "degree");
-			    xmlwriter.writeAttribute("temp_unit", "℃");
-			    xmlwriter.writeAttribute("projection", "epsg:4326");
-			    xmlwriter.writeAttribute("boundary", cropTop + " " + cropBottom + " " + cropLeft + " " + cropRight);
-			    				    
-			    for(int k=0 ; k<rows ; k++) {
-					
+
+				xmlwriter.writeStartElement("wintem");
+
+				xmlwriter.writeAttribute("model", "kim_rdps");
+				xmlwriter.writeAttribute("timezone", "utc");
+				xmlwriter.writeAttribute("issued_dt", new SimpleDateFormat("yyyyMMddHH").format(issuedDt));
+				xmlwriter.writeAttribute("fcst_dt", new SimpleDateFormat("yyyyMMddHH").format(fcstDt));
+				xmlwriter.writeAttribute("height", "FL" + heightText);
+				xmlwriter.writeAttribute("ws_unit", "knot");
+				xmlwriter.writeAttribute("wd_unit", "degree");
+				xmlwriter.writeAttribute("temp_unit", "℃");
+				xmlwriter.writeAttribute("projection", "epsg:4326");
+				xmlwriter.writeAttribute("boundary", cropTop + " " + cropBottom + " " + cropLeft + " " + cropRight);
+
+				// 원본 풍속의 m/s 단위를 knot으로 변환한다.
+				final double msToKnot = 3600.0 / 1852.0;
+
+				for(int k=0 ; k<rows ; k++) {
+
 					for(int l=0 ; l<cols ; l++) {
-						
+
 						if(k % 30 != 0 || l % 20 != 0) {
+
 							continue;
+
 						}
-						
-						float u = regridValuesUWind[k][l];
-						float v = regridValuesVWind[k][l];
-						
+
+						// 재격자 배열은 남쪽부터 저장되어 있으므로 북쪽 행부터 읽는다.
+						int sourceRow = rows - 1 - k;
+
+						float u = regridValuesUWind[sourceRow][l];
+						float v = regridValuesVWind[sourceRow][l];
+
 						if(u == -999 || v == -999) {
+
 							continue;
+
 						}
-							
-						double wd = Math.atan2(u, v) * 180 / Math.PI + 180;		
-						double ws = Math.sqrt(u*u + v*v);
-						int temp = (int)(regridValuesTemp[k][l] - 273.15);	
-						
-						double xCoord = boundLonLat.getLeft() + l * lonTerm;							
+
+						double wd = Math.atan2(u, v) * 180 / Math.PI + 180;
+						double ws = Math.sqrt(u*u + v*v) * msToKnot;
+
+						int temp = (int)(regridValuesTemp[sourceRow][l] - 273.15);
+
+						// XML 좌표는 높은 위도에서 낮은 위도 순서로 기록한다.
+						double xCoord = boundLonLat.getLeft() + l * lonTerm;
 						double yCoord = boundLonLat.getTop() - k * latTerm;
-						
-						if(xCoord < cropLeft || xCoord > cropRight || yCoord < cropBottom || yCoord > cropTop) {
+
+						if(xCoord < cropLeft || xCoord > cropRight
+								|| yCoord < cropBottom || yCoord > cropTop) {
+
 							continue;
+
 						}
-					
+
 						xmlwriter.writeStartElement("grid");
-						xmlwriter.writeAttribute("lat", yCoord+"");
-					    xmlwriter.writeAttribute("lon", xCoord+"");
-					    
+						xmlwriter.writeAttribute("lat", yCoord + "");
+						xmlwriter.writeAttribute("lon", xCoord + "");
+
 						xmlwriter.writeStartElement("wd");
-						xmlwriter.writeCharacters(wd+"");
+						xmlwriter.writeCharacters(wd + "");
 						xmlwriter.writeEndElement();
+
 						xmlwriter.writeStartElement("ws");
-						xmlwriter.writeCharacters(ws+"");
+						xmlwriter.writeCharacters(ws + "");
 						xmlwriter.writeEndElement();
+
 						xmlwriter.writeStartElement("temp");
-						xmlwriter.writeCharacters(temp+"");
-						xmlwriter.writeEndElement();						   
-					    
-					    xmlwriter.writeEndElement();
+						xmlwriter.writeCharacters(temp + "");
+						xmlwriter.writeEndElement();
+
+						xmlwriter.writeEndElement();
+
 					}
+
 				}
-				
-				xmlwriter.writeEndElement();					
+
+				xmlwriter.writeEndElement();
 				xmlwriter.writeEndDocument();
-				
+
+				xmlwriter.flush();
 				writer.flush();
+
+				xmlwriter.close();
 				writer.close();
-				
+
 				System.out.println("\t\t-> End Write Xml [" + xmlFile.getAbsolutePath() + "]");
 				System.out.println();
 			}
