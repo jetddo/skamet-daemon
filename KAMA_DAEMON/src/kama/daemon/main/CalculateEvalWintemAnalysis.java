@@ -54,7 +54,8 @@ public class CalculateEvalWintemAnalysis {
 
 	private DatabaseManager dbManager;
 
-	private final String DATA_STORE_PATH = "//172.26.56.124/data_store";
+	private final String DATA_STORE_PATH = "/data/DATA_STORE";
+	//private final String DATA_STORE_PATH = "//172.26.56.124/data_store";
 
 	private final String GDPS_NE57_ANAL_PATH = DATA_STORE_PATH + "/GDPS_NE57_ANAL";
 	private final String GDPS_NE57_ANAL_PREFIX = "GDPS_NE57";
@@ -124,17 +125,20 @@ public class CalculateEvalWintemAnalysis {
 
 				Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 
-				Date currentTm = new Date();
-				//Date currentTm = sdf.parse("2026100700");
+				Date currentTm = sdf.parse(sdf.format(new Date()));
+				//Date currentTm = sdf.parse("2026101200");
 
 				// 하루단위로 실행하고 00,06,12,18시 단위로 데이터를 처리한다.
 				cal.setTime(new Date(currentTm.getTime()));
+				
 				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.add(Calendar.HOUR_OF_DAY, -6);
 
 				Date startTm = cal.getTime();
 
 				cal.setTime(new Date(currentTm.getTime()));
-				cal.set(Calendar.HOUR_OF_DAY, 18);
+				cal.set(Calendar.HOUR_OF_DAY, 0);
+				cal.add(Calendar.HOUR_OF_DAY, 6);
 
 				Date endTm = cal.getTime();
 
@@ -182,15 +186,19 @@ public class CalculateEvalWintemAnalysis {
 		String gdpsNe57AnalPath = GDPS_NE57_ANAL_PATH + "/" + sdf2.format(issuedTm);
 
 		File gdpsNe57AnalDir = new File(gdpsNe57AnalPath);
+		
+		logEval("INFO", "분석장 파일 디렉토리: " + gdpsNe57AnalDir.getAbsolutePath());
+		
+		final String analRegex = GDPS_NE57_ANAL_PREFIX +"_" + sdf.format(issuedTm) + "_[0-9]{10}_h[0-9]{3}.csv";
+		
+		logEval("INFO", "분석장 파일 Regex: " + analRegex);
 
 		File[] gdpsNe57AnalFileList = gdpsNe57AnalDir.listFiles(new FilenameFilter() {
 
 			@Override
 			public boolean accept(File dir, String name) {
 
-				String regex = GDPS_NE57_ANAL_PREFIX +"_" + sdf.format(issuedTm) + "_[0-9]{10}_h[0-9]{3}.csv";
-
-				if (name.matches(regex)) {
+				if (name.matches(analRegex)) {
 
 					int hour = Integer.parseInt(name.substring(name.length() - 7, name.length() - 4));
 
@@ -218,6 +226,8 @@ public class CalculateEvalWintemAnalysis {
 			return evalWintemAnalysisPairList;
 
 		}
+		
+		logEval("INFO", "분석장 파일 갯수: " + gdpsNe57AnalFileList.length);
 
 		// 예보시간 순서대로 처리하여 같은 발표시각 아래의 로그 순서를 일정하게 유지한다.
 		Arrays.sort(gdpsNe57AnalFileList, new Comparator<File>() {
@@ -242,20 +252,22 @@ public class CalculateEvalWintemAnalysis {
 			final int hour = Integer.parseInt(gdpsNe57AnalFileName.substring(gdpsNe57AnalFileName.length() - 7, gdpsNe57AnalFileName.length() - 4));
 
 			File wintemXmlDir = new File(wintemXmlPath);
+			
+			logEval("INFO", "WINTEM XML 파일 디렉토리: " + wintemXmlDir.getAbsolutePath());
+			
+			final String wintemRegex = WINTEM_XML_PREFIX +"_FL[0-9]{3}_" + String.format("%02d", hour) + "H_" + sdf.format(issuedTm) + "00.xml";
+			
+			logEval("INFO", "WINTEM XML 파일 Regex: " + wintemRegex);
 
 			File[] wintemXmlFileList = wintemXmlDir.listFiles(new FilenameFilter() {
 
 				@Override
 				public boolean accept(File dir, String name) {
 
-					//WINTEM_KIM_RDPS_NOR_FL060_00H_202610050000.xml
+					//WINTEM_KIM_RDPS_NOR_FL060_00H_202610050000.xmls
 
-					String regex = WINTEM_XML_PREFIX +"_FL[0-9]{3}_" + String.format("%02d", hour) + "H_" + sdf.format(issuedTm) + "00.xml";
-
-					if (name.matches(regex)) {
-
+					if (name.matches(wintemRegex)) {
 						return true;
-
 					}
 
 					return false;
@@ -270,6 +282,8 @@ public class CalculateEvalWintemAnalysis {
 				continue;
 
 			}
+			
+			logEval("INFO", "WINTEM XML 파일 갯수: " + wintemXmlFileList.length);
 
 			evalWintemAnalysisPair.put("issuedTm", issuedTm);
 			evalWintemAnalysisPair.put("fcstHour", hour);
@@ -290,6 +304,9 @@ public class CalculateEvalWintemAnalysis {
 		SimpleDateFormat issuedLogFormat = new SimpleDateFormat("yyyyMMddHH", Locale.ROOT);
 		issuedLogFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		String issuedLogText = issuedLogFormat.format(issuedTm);
+		
+		System.out.println("\n=============================================================================================================");
+		
 		logEval("INFO", "issuedTm=%s UTC", issuedLogText);
 
 		// CSV 한 개와 XML 23개가 대응하는 파일 묶음을 가져온다.

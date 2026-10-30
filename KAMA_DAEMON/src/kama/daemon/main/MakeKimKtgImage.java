@@ -275,7 +275,7 @@ public class MakeKimKtgImage {
 				ncFile.close();
 				
 			} catch (Exception e) {
-				
+				e.printStackTrace();
 			}
 		}
 		
