@@ -38,7 +38,7 @@ import kama.daemon.common.db.DatabaseManager;
 import kama.daemon.common.util.DaemonSettings;
 import kama.daemon.common.util.DaemonUtils;
 
-public class CalculateEvalWintemAnalysis {
+public class EvaluateWintem {
 
 	// 기본값은 상세 로그 OFF이다. -Dwintem.eval.detailLog=true로 켤 수 있다.
 	private boolean evalDetailLogEnabled = Boolean.getBoolean("wintem.eval.detailLog");
@@ -54,7 +54,8 @@ public class CalculateEvalWintemAnalysis {
 
 	private DatabaseManager dbManager;
 
-	private final String DATA_STORE_PATH = "/data/DATA_STORE";
+	private final String DATA_STORE_PATH = "F:/data/datastore";
+	//private final String DATA_STORE_PATH = "/data/DATA_STORE";
 	//private final String DATA_STORE_PATH = "//172.26.56.124/data_store";
 
 	private final String GDPS_NE57_ANAL_PATH = DATA_STORE_PATH + "/GDPS_NE57_ANAL";
@@ -693,6 +694,7 @@ public class CalculateEvalWintemAnalysis {
 					}
 
 					double tempSum = 0, wsSum = 0, wdSum = 0;
+					double tempScoreSum = 0, wsScoreSum = 0;
 					int sampleCount = 0, wdSampleCount = 0;
 					Set<Integer> matchedGrids = new HashSet<Integer>();
 
@@ -803,23 +805,38 @@ public class CalculateEvalWintemAnalysis {
 						}
 
 						// 편향은 예측장 값에서 분석장 값을 뺀 값으로 누적한다.
-						tempSum += forecast[0] - analysisTemp;
-						wsSum += forecast[1] - analysisWs;
+						// 격자별 기온 및 풍속 편차를 계산한다.
+						double tempDiff = forecast[0] - analysisTemp;
+						double wsDiff = forecast[1] - analysisWs;
+
+						// 기존 평균 편향 계산을 위한 누적
+						tempSum += tempDiff;
+						wsSum += wsDiff;
+
+						// 격자별 평가 점수 계산
+						// 기온: 절대편차 2℃ 이하 100점, 초과 0점
+						// 풍속: 절대편차 10kt 이하 100점, 초과 0점
+						tempScoreSum += Math.abs(tempDiff) <= 2.0 ? 100.0 : 0.0;
+						wsScoreSum += Math.abs(wsDiff) <= 10.0 ? 100.0 : 0.0;
+
 						sampleCount++;
 
 						// 풍향 차이는 -180도 이상 180도 미만으로 맞추며, 무풍 격자는 제외한다.
 						if (forecast[1] > 0 && analysisWs > 0 && analysisWdValid) {
 
-							double wdDifference = ((forecast[2] - analysisWd + 540.0) % 360.0) - 180.0;
-							wdSum += wdDifference;
-							wdSampleCount++;
+						    double wdDifference = ((forecast[2] - analysisWd + 540.0) % 360.0) - 180.0;
+
+						    wdSum += wdDifference;
+						    wdSampleCount++;
 
 						}
 
 					}
 
 					// 격자별 차이의 평균을 DB 칼럼명 기준으로 구성한다.
+					// 격자별 평균 편향 및 평균 점수를 DB 칼럼명 기준으로 구성한다.
 					Map<String, Object> result = new LinkedHashMap<String, Object>();
+
 					result.put("ISSUED_TM", new Date(expectedIssued.getTime()));
 					result.put("FCST_TM", new Date(fcstTm.getTime()));
 					result.put("DOMAIN", EVAL_WINTEM_DOMAIN);
@@ -827,13 +844,28 @@ public class CalculateEvalWintemAnalysis {
 
 					// FL_HEIGHT는 FL 번호이다. 예: FL010은 10으로 저장한다.
 					result.put("FL_HEIGHT", fl);
-					result.put("TEMP_BAIS_AVG", tempSum / sampleCount);
-					result.put("WS_BIAS_AVG", wsSum / sampleCount);
-					result.put("WD_BIAS_AVG", wdSampleCount == 0 ? null : Double.valueOf(wdSum / wdSampleCount));
 
-					// 아래 표본 수는 확인용이다. DB에 해당 칼럼이 없으면 저장 대상에서 제외한다.
+					// 평균 편향
+					result.put("TEMP_BIAS_AVG", tempSum / sampleCount);
+					result.put("WS_BIAS_AVG", wsSum / sampleCount);
+					result.put("WD_BIAS_AVG",
+					        wdSampleCount == 0 ? null : Double.valueOf(wdSum / wdSampleCount));
+
+					// 격자별 평가 점수의 평균
+					double tempAvgScore = tempScoreSum / sampleCount;
+					double wsAvgScore = wsScoreSum / sampleCount;
+
+					// 기온과 풍속 점수의 산술평균
+					double totalAvgScore = (tempAvgScore + wsAvgScore) / 2.0;
+
+					result.put("TEMP_AVG_SCORE", tempAvgScore);
+					result.put("WS_AVG_SCORE", wsAvgScore);
+					result.put("TOTAL_AVG_SCORE", totalAvgScore);
+
+					// 확인용 표본 수
 					result.put("SAMPLE_COUNT", sampleCount);
 					result.put("WD_SAMPLE_COUNT", wdSampleCount);
+
 					results.add(result);
 
 				}
@@ -859,12 +891,17 @@ public class CalculateEvalWintemAnalysis {
 						Object direction = row.get("WD_BIAS_AVG");
 						String wdText = direction == null ? "N/A"
 								: String.format(Locale.ROOT, "%+.4f", ((Number) direction).doubleValue());
-						logEval("INFO", "\t\tFL%03d 저장 성공: TEMP=%+.4f ℃, WS=%+.4f kt, WD=%s deg, N=%d, WD_N=%d",
-								((Number)row.get("FL_HEIGHT")).intValue(),
-								((Number)row.get("TEMP_BAIS_AVG")).doubleValue(),
-								((Number)row.get("WS_BIAS_AVG")).doubleValue(), wdText,
-								((Number)row.get("SAMPLE_COUNT")).intValue(),
-								((Number)row.get("WD_SAMPLE_COUNT")).intValue());
+						logEval("INFO",
+						        "\t\tFL%03d 저장 성공: TEMP=%+.4f ℃, WS=%+.4f kt, WD=%s deg, TEMP_SCORE=%.2f, WS_SCORE=%.2f, TOTAL_SCORE=%.2f, N=%d, WD_N=%d",
+						        ((Number)row.get("FL_HEIGHT")).intValue(),
+						        ((Number)row.get("TEMP_BIAS_AVG")).doubleValue(),
+						        ((Number)row.get("WS_BIAS_AVG")).doubleValue(),
+						        wdText,
+						        ((Number)row.get("TEMP_AVG_SCORE")).doubleValue(),
+						        ((Number)row.get("WS_AVG_SCORE")).doubleValue(),
+						        ((Number)row.get("TOTAL_AVG_SCORE")).doubleValue(),
+						        ((Number)row.get("SAMPLE_COUNT")).intValue(),
+						        ((Number)row.get("WD_SAMPLE_COUNT")).intValue());
 
 					}
 
@@ -972,48 +1009,91 @@ public class CalculateEvalWintemAnalysis {
 
 	private String buildEvalWintemMergeQuery(Map<String, Object> result) {
 
-		if(result == null || !(result.get("ISSUED_TM") instanceof Date)
-				|| !(result.get("FCST_TM") instanceof Date)
-				|| !(result.get("FL_HEIGHT") instanceof Integer)) {
+	    if(result == null || !(result.get("ISSUED_TM") instanceof Date)
+	            || !(result.get("FCST_TM") instanceof Date)
+	            || !(result.get("FL_HEIGHT") instanceof Integer)) {
 
-			throw new IllegalArgumentException("DB 저장 결과의 시각 또는 고도가 잘못되었습니다.");
+	        throw new IllegalArgumentException("DB 저장 결과의 시각 또는 고도가 잘못되었습니다.");
 
-		}
+	    }
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT);
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT);
+	    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-		String issuedText = sdf.format((Date)result.get("ISSUED_TM"));
-		String fcstText = sdf.format((Date)result.get("FCST_TM"));
-		String model = this.getEvalSqlText(result.get("MODEL"));
-		String domain = this.getEvalSqlText(result.get("DOMAIN"));
-		String flHeight = Integer.toString((Integer)result.get("FL_HEIGHT"));
+	    String issuedText = sdf.format((Date)result.get("ISSUED_TM"));
+	    String fcstText = sdf.format((Date)result.get("FCST_TM"));
 
-		// TEMP_BAIS_AVG는 전달받은 실제 DB 칼럼명이다. BAIS 철자를 그대로 사용한다.
-		String tempBiasAvg = this.getEvalSqlNumber(result.get("TEMP_BAIS_AVG"));
-		String wsBiasAvg = this.getEvalSqlNumber(result.get("WS_BIAS_AVG"));
-		String wdBiasAvg = this.getEvalSqlNumber(result.get("WD_BIAS_AVG"));
+	    String model = this.getEvalSqlText(result.get("MODEL"));
+	    String domain = this.getEvalSqlText(result.get("DOMAIN"));
+	    String flHeight = Integer.toString((Integer)result.get("FL_HEIGHT"));
 
-		// 같은 발표·예측시각, 모델, 도메인, 고도는 갱신하고 새 결과는 추가한다.
-		// SAMPLE_COUNT와 WD_SAMPLE_COUNT는 확인용이므로 저장 칼럼에서 제외한다.
-		String query = "MERGE INTO " + EVAL_WINTEM_RESULT_TABLE + " T " +
-				"USING (SELECT " +
-				"TO_DATE('" + issuedText + "', 'YYYYMMDDHH24MISS') AS ISSUED_TM, " +
-				"TO_DATE('" + fcstText + "', 'YYYYMMDDHH24MISS') AS FCST_TM, " +
-				model + " AS MODEL, " + domain + " AS DOMAIN, " + flHeight + " AS FL_HEIGHT, " +
-				tempBiasAvg + " AS TEMP_BAIS_AVG, " + wsBiasAvg + " AS WS_BIAS_AVG, " +
-				wdBiasAvg + " AS WD_BIAS_AVG FROM DUAL) S " +
-				"ON (T.ISSUED_TM = S.ISSUED_TM AND T.FCST_TM = S.FCST_TM " +
-				"AND T.MODEL = S.MODEL AND T.DOMAIN = S.DOMAIN AND T.FL_HEIGHT = S.FL_HEIGHT) " +
-				"WHEN MATCHED THEN UPDATE SET " +
-				"T.TEMP_BAIS_AVG = S.TEMP_BAIS_AVG, T.WS_BIAS_AVG = S.WS_BIAS_AVG, " +
-				"T.WD_BIAS_AVG = S.WD_BIAS_AVG " +
-				"WHEN NOT MATCHED THEN INSERT " +
-				"(ISSUED_TM, FCST_TM, MODEL, DOMAIN, FL_HEIGHT, TEMP_BAIS_AVG, WS_BIAS_AVG, WD_BIAS_AVG) " +
-				"VALUES (S.ISSUED_TM, S.FCST_TM, S.MODEL, S.DOMAIN, S.FL_HEIGHT, " +
-				"S.TEMP_BAIS_AVG, S.WS_BIAS_AVG, S.WD_BIAS_AVG)";
+	    // 평균 편향
+	    String tempBiasAvg = this.getEvalSqlNumber(result.get("TEMP_BIAS_AVG"));
+	    String wsBiasAvg = this.getEvalSqlNumber(result.get("WS_BIAS_AVG"));
+	    String wdBiasAvg = this.getEvalSqlNumber(result.get("WD_BIAS_AVG"));
 
-		return query;
+	    // 평균 점수
+	    String tempAvgScore = this.getEvalSqlNumber(result.get("TEMP_AVG_SCORE"));
+	    String wsAvgScore = this.getEvalSqlNumber(result.get("WS_AVG_SCORE"));
+	    String totalAvgScore = this.getEvalSqlNumber(result.get("TOTAL_AVG_SCORE"));
+
+	    // 동일한 발표시각, 예측시각, 모델, 도메인, 고도는 갱신한다.
+	    String query =
+
+	        "MERGE INTO " + EVAL_WINTEM_RESULT_TABLE + " T " +
+
+	        "USING (SELECT " +
+
+	        "TO_DATE('" + issuedText + "', 'YYYYMMDDHH24MISS') AS ISSUED_TM, " +
+	        "TO_DATE('" + fcstText + "', 'YYYYMMDDHH24MISS') AS FCST_TM, " +
+
+	        model + " AS MODEL, " +
+	        domain + " AS DOMAIN, " +
+	        flHeight + " AS FL_HEIGHT, " +
+
+	        tempBiasAvg + " AS TEMP_BIAS_AVG, " +
+	        wsBiasAvg + " AS WS_BIAS_AVG, " +
+	        wdBiasAvg + " AS WD_BIAS_AVG, " +
+
+	        tempAvgScore + " AS TEMP_AVG_SCORE, " +
+	        wsAvgScore + " AS WS_AVG_SCORE, " +
+	        totalAvgScore + " AS TOTAL_AVG_SCORE " +
+
+	        "FROM DUAL) S " +
+
+	        "ON (" +
+	        "T.ISSUED_TM = S.ISSUED_TM " +
+	        "AND T.FCST_TM = S.FCST_TM " +
+	        "AND T.MODEL = S.MODEL " +
+	        "AND T.DOMAIN = S.DOMAIN " +
+	        "AND T.FL_HEIGHT = S.FL_HEIGHT" +
+	        ") " +
+
+	        "WHEN MATCHED THEN UPDATE SET " +
+
+	        "T.TEMP_BIAS_AVG = S.TEMP_BIAS_AVG, " +
+	        "T.WS_BIAS_AVG = S.WS_BIAS_AVG, " +
+	        "T.WD_BIAS_AVG = S.WD_BIAS_AVG, " +
+
+	        "T.TEMP_AVG_SCORE = S.TEMP_AVG_SCORE, " +
+	        "T.WS_AVG_SCORE = S.WS_AVG_SCORE, " +
+	        "T.TOTAL_AVG_SCORE = S.TOTAL_AVG_SCORE " +
+
+	        "WHEN NOT MATCHED THEN INSERT (" +
+
+	        "ISSUED_TM, FCST_TM, MODEL, DOMAIN, FL_HEIGHT, " +
+	        "TEMP_BIAS_AVG, WS_BIAS_AVG, WD_BIAS_AVG, " +
+	        "TEMP_AVG_SCORE, WS_AVG_SCORE, TOTAL_AVG_SCORE" +
+
+	        ") VALUES (" +
+
+	        "S.ISSUED_TM, S.FCST_TM, S.MODEL, S.DOMAIN, S.FL_HEIGHT, " +
+	        "S.TEMP_BIAS_AVG, S.WS_BIAS_AVG, S.WD_BIAS_AVG, " +
+	        "S.TEMP_AVG_SCORE, S.WS_AVG_SCORE, S.TOTAL_AVG_SCORE" +
+
+	        ")";
+
+	    return query;
 
 	}
 
@@ -1073,8 +1153,8 @@ public class CalculateEvalWintemAnalysis {
 
 	public static void main(String[] args) {
 
-		CalculateEvalWintemAnalysis anal = new CalculateEvalWintemAnalysis();
-		anal.process();
+		EvaluateWintem eval = new EvaluateWintem();
+		eval.process();
 
 	}
 

@@ -126,17 +126,21 @@ public class DatabaseManager implements AutoCloseable
         return rs;
     }
 
-	public PreparedStatement getUnmanagedPrepareStatement(final String sql) {
-		_checkDBOpen();
+    public PreparedStatement getUnmanagedPrepareStatement(final String sql) {
 
-		try {
-			return this._conn.prepareStatement(sql);
-		} catch (SQLException e) {
-			Log.print("Error : SQL execution failed on preparedStatement.");
-		}
+        _checkDBOpen();
 
-		return null;
-	}
+        try {
+
+            return this._conn.prepareStatement(sql);
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                "DatabaseManager.getUnmanagedPrepareStatement failed.", e
+            );
+        }
+    }
 
     public void setPreparedStatement(String... queries)
     {
@@ -162,7 +166,7 @@ public class DatabaseManager implements AutoCloseable
     {
         _checkDBOpen();
 
-        if (_isStmtPrepared)
+        if (!_isStmtPrepared)
         {
             throw new DaemonException("Error : SQL statement is not prepared. You must run setPreparedStatement() to prepare SQL statements first.", false);
         }

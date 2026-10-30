@@ -2,6 +2,7 @@ package kama.daemon.common.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import kama.daemon.common.util.DaemonUtils;
-
 import org.apache.commons.configuration2.Configuration;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
+import kama.daemon.common.util.DaemonUtils;
 
 public class AmisDataBaseManager {
 
@@ -38,9 +39,11 @@ public class AmisDataBaseManager {
 
 		} catch (SQLException e) {
 
-			System.out.println("DataBaseManager -> " + e.getMessage());
-
 			this.safeClose();
+			
+			throw new RuntimeException(
+		        "AmisDataBaseManager -> Connection failed.", e
+		    );
 		}
 	}
 
@@ -174,6 +177,37 @@ public class AmisDataBaseManager {
 		}
 
 		return resultList;
+	}
+	
+	public List<Map<String, Object>> select(String query, Object... params) {
+
+	    List<Map<String, Object>> resultList =
+	            new ArrayList<Map<String, Object>>();
+
+	    try (PreparedStatement pstmt = this.connect.prepareStatement(query)) {
+
+	        for (int i = 0; i < params.length; i++) {
+	            pstmt.setObject(i + 1, params[i]);
+	        }
+
+	        try (ResultSet rs = pstmt.executeQuery()) {
+
+	            while (rs.next()) {
+
+	                resultList.add(
+	                    DaemonUtils.getCamelcaseResultSetData(rs)
+	                );
+	            }
+	        }
+
+	    } catch (SQLException e) {
+
+	        throw new RuntimeException(
+	            "AmisDataBaseManager.select -> SQL execution failed.", e
+	        );
+	    }
+
+	    return resultList;
 	}
 
 	public void safeClose() {
