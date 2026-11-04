@@ -6,9 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 
 import kama.daemon.common.db.AmisDataBaseManager;
 import kama.daemon.common.db.DatabaseManager;
@@ -16,9 +21,6 @@ import kama.daemon.common.util.DaemonSettings;
 import kama.daemon.common.util.DaemonUtils;
 import kr.go.aviation.message.AviationWeatherMessageValidator;
 import kr.go.aviation.message.MissingItem;
-
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 
 /**
  * 항공기상 전문 평가 프로그램
@@ -69,13 +71,41 @@ public class EvaluateAviationMessage {
             "ORDER BY TM ASC                             ";
 
     private final String insertEvaluationResultQuery =
-            "INSERT /*+ IGNORE_ROW_ON_DUPKEY_INDEX(EVAL_AVIATION_MSG EVAL_AVIATION_MSG_PK) */ INTO EVAL_AVIATION_MSG ( " +
+            "MERGE INTO EVAL_AVI_MSG_REGULAR_RESULT A " +
+            "USING ( " +
+            "    SELECT TO_DATE(?, 'YYYYMMDDHH24MI') AS TM, " +
+            "           ? AS AVIATION_MSG_TYPE, " +
+            "           ? AS STN_CD, " +
+            "           ? AS MSG_NO, " +
+            "           ? AS MSG_STS, " +
+            "           ? AS MTPH, " +
+            "           ? AS ST_TM, " +
+            "           ? AS ED_TM, " +
+            "           ? AS MSG_SRC, " +
+            "           ? AS SCORE, " +
+            "           ? AS EVAL_MESSAGE " +
+            "    FROM DUAL " +
+            ") B " +
+            "ON ( " +
+            "    A.TM = B.TM " +
+            "    AND A.AVIATION_MSG_TYPE = B.AVIATION_MSG_TYPE " +
+            "    AND A.STN_CD = B.STN_CD " +
+            "    AND A.MSG_NO = B.MSG_NO " +
+            ") " +
+            "WHEN MATCHED THEN UPDATE SET " +
+            "    A.MSG_STS = B.MSG_STS, " +
+            "    A.MTPH = B.MTPH, " +
+            "    A.ST_TM = B.ST_TM, " +
+            "    A.ED_TM = B.ED_TM, " +
+            "    A.MSG_SRC = B.MSG_SRC, " +
+            "    A.SCORE = B.SCORE, " +
+            "    A.EVAL_MESSAGE = B.EVAL_MESSAGE " +
+            "WHEN NOT MATCHED THEN INSERT ( " +
             "    TM, AVIATION_MSG_TYPE, STN_CD, MSG_NO, " +
-            "    MSG_STS, MTPH, ST_TM, ED_TM, MSG_SRC, " +
-            "    SCORE, EVAL_MESSAGE " +
+            "    MSG_STS, MTPH, ST_TM, ED_TM, MSG_SRC, SCORE, EVAL_MESSAGE " +
             ") VALUES ( " +
-            "    TO_DATE(?, 'YYYYMMDDHH24MI'), " +
-            "    ?, ?, ?, ?, ?, ?, ?, ?, ?, ? " +
+            "    B.TM, B.AVIATION_MSG_TYPE, B.STN_CD, B.MSG_NO, " +
+            "    B.MSG_STS, B.MTPH, B.ST_TM, B.ED_TM, B.MSG_SRC, B.SCORE, B.EVAL_MESSAGE " +
             ")";
 
     private Configuration config;
@@ -155,134 +185,134 @@ public class EvaluateAviationMessage {
         System.out.println(this.logDateFormat.format(new Date()) + " -> ::::: End EvaluateAviationMessage :::::");
     }
 
-    /**
-     * AIRMET 평가
-     */
-    private void evaluateAirmet(Date startDate, Date endDate) {
-    	
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        String stDtStr = sdf.format(startDate);
-        String edDtStr = sdf.format(endDate);
+	/**
+	 * AIRMET 평가
+	 */
+	private void evaluateAirmet(Date startDate, Date endDate) {
+	
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+	    String stDtStr = sdf.format(startDate);
+	    String edDtStr = sdf.format(endDate);
+	
+	    long startMillis = System.currentTimeMillis();
+	
+	    int successCount = 0;
+	    int failureCount = 0;
+	
+	    try {
+	
+	        List<Map<String, Object>> airmetDataList = this.getAmisAirmetDataList(stDtStr, edDtStr);
+	
+	        List<Map<String, Object>> evaluationResultList = new ArrayList<Map<String, Object>>();
+	
+	        for (Map<String, Object> data : airmetDataList) {
+	
+	            String msgSrc = (String) data.get("msgSrc");
+	            List<MissingItem> missingItemList = AviationWeatherMessageValidator.validateAirmet(msgSrc);
+	
+	            String score = missingItemList.isEmpty() ? "100" : "0";
+	            String evalMessage = this.getEvaluationMessage(missingItemList);
+	
+	            data.put("aviationMsgType", "AIRMET");
+	            data.put("score", score);
+	            data.put("evalMessage", evalMessage);
+	
+	            evaluationResultList.add(data);
+	
+	            if (missingItemList.isEmpty()) {
+	                successCount++;
+	            } else {
+	                failureCount++;
+	            }
+	        }
+	
+	        // 평가 결과 저장
+	        this.insertEvaluationResultList(evaluationResultList);
+	
+	        // 트랜잭션 확정
+	        this.dbManager.commit();
+	
+	        long elapsedMillis = System.currentTimeMillis() - startMillis;
+	
+	        this.printEvaluationResultLog(
+	                "AIRMET", startDate, endDate,
+	                airmetDataList.size(), successCount, failureCount, elapsedMillis
+	        );
+	
+	    } catch (Exception e) {
+	
+	        e.printStackTrace();
+	
+	        this.dbManager.rollback();
+	
+	        throw new RuntimeException("EvaluateAviationMessage.evaluateAirmet failed.", e);
+	    }
+	}
 
-        int successCount = 0;
-        int failureCount = 0;
+	/**
+	 * SIGMET 평가
+	 */
+	private void evaluateSigmet(Date startDate, Date endDate) {
+	
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+	    String stDtStr = sdf.format(startDate);
+	    String edDtStr = sdf.format(endDate);
+	
+	    long startMillis = System.currentTimeMillis();
+	
+	    int successCount = 0;
+	    int failureCount = 0;
+	
+	    try {
+	
+	        List<Map<String, Object>> sigmetDataList = this.getAmisSigmetDataList(stDtStr, edDtStr);
+	
+	        List<Map<String, Object>> evaluationResultList = new ArrayList<Map<String, Object>>();
+	
+	        for (Map<String, Object> data : sigmetDataList) {
+	
+	            String msgSrc = (String) data.get("msgSrc");
+	            List<MissingItem> missingItemList = AviationWeatherMessageValidator.validateSigmet(msgSrc);
+	
+	            String score = missingItemList.isEmpty() ? "100" : "0";
+	            String evalMessage = this.getEvaluationMessage(missingItemList);
+	
+	            data.put("aviationMsgType", "SIGMET");
+	            data.put("score", score);
+	            data.put("evalMessage", evalMessage);
+	
+	            evaluationResultList.add(data);
+	
+	            if (missingItemList.isEmpty()) {
+	                successCount++;
+	            } else {
+	                failureCount++;
+	            }
+	        }
+	
+	        // 평가 결과 저장
+	        this.insertEvaluationResultList(evaluationResultList);
+	
+	        // 트랜잭션 확정
+	        this.dbManager.commit();
+	
+	        long elapsedMillis = System.currentTimeMillis() - startMillis;
+	
+	        this.printEvaluationResultLog(
+	                "SIGMET", startDate, endDate,
+	                sigmetDataList.size(), successCount, failureCount, elapsedMillis
+	        );
+	
+	    } catch (Exception e) {
+	
+	        e.printStackTrace();
+	
+	        this.dbManager.rollback();
+	
+	        throw new RuntimeException("EvaluateAviationMessage.evaluateSigmet failed.", e);
+	    }
+	}
 
-        try {
-        	
-            List<Map<String, Object>> airmetDataList = this.getAmisAirmetDataList(stDtStr, edDtStr);
-
-            System.out.println("Info : EvaluateAviationMessage.evaluateAirmet -> " + "airmetDataList Size [" + airmetDataList.size() + "]");
-
-            List<Map<String, Object>> evaluationResultList = new ArrayList<Map<String, Object>>();
-
-            for (Map<String, Object> data : airmetDataList) {
-            	
-                String msgSrc = (String) data.get("msgSrc");
-                List<MissingItem> missingItemList = AviationWeatherMessageValidator.validateAirmet(msgSrc);
-                String score = missingItemList.isEmpty() ? "100" : "0";
-                String evalMessage = this.getEvaluationMessage(missingItemList);
-
-                data.put("aviationMsgType", "AIRMET");
-                data.put("score", score);
-                data.put("evalMessage", evalMessage);
-
-                evaluationResultList.add(data);
-
-                if (missingItemList.isEmpty()) {
-                    successCount++;
-                } else {
-                    failureCount++;
-                }
-            }
-
-            // 평가 결과 저장
-            this.insertEvaluationResultList(evaluationResultList);
-
-            // 트랜잭션 확정
-            this.dbManager.commit();
-
-            System.out.println(
-                "Info : EvaluateAviationMessage.evaluateAirmet -> " +
-                "TOTAL [" + airmetDataList.size() + "], " +
-                "SUCCESS [" + successCount + "], " +
-                "FAILURE [" + failureCount + "]"
-            );
-
-        } catch (Exception e) {
-        	
-            e.printStackTrace();
-
-            this.dbManager.rollback();
-
-            throw new RuntimeException("EvaluateAviationMessage.evaluateAirmet failed.", e );
-        }
-    }
-
-    /**
-     * SIGMET 평가
-     */
-    private void evaluateSigmet(Date startDate, Date endDate) {
-    	
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        String stDtStr = sdf.format(startDate);
-        String edDtStr = sdf.format(endDate);
-
-        int successCount = 0;
-        int failureCount = 0;
-
-        try {
-        	
-            List<Map<String, Object>> sigmetDataList = this.getAmisSigmetDataList(stDtStr, edDtStr);
-
-            System.out.println(
-                "Info : EvaluateAviationMessage.evaluateSigmet -> " +
-                "sigmetDataList Size [" + sigmetDataList.size() + "]"
-            );
-
-            List<Map<String, Object>> evaluationResultList = new ArrayList<Map<String, Object>>();
-
-            for (Map<String, Object> data : sigmetDataList) {
-            	
-                String msgSrc = (String) data.get("msgSrc");
-                List<MissingItem> missingItemList = AviationWeatherMessageValidator.validateSigmet(msgSrc);
-                String score = missingItemList.isEmpty() ? "100" : "0";
-                String evalMessage = this.getEvaluationMessage(missingItemList);
-
-                data.put("aviationMsgType", "SIGMET");
-                data.put("score", score);
-                data.put("evalMessage", evalMessage);
-
-                evaluationResultList.add(data);
-
-                if (missingItemList.isEmpty()) {
-                    successCount++;
-                } else {
-                    failureCount++;
-                }
-            }
-
-            // 평가 결과 저장
-            this.insertEvaluationResultList(evaluationResultList);
-
-            // 트랜잭션 확정
-            this.dbManager.commit();
-
-            System.out.println(
-                "Info : EvaluateAviationMessage.evaluateSigmet -> " +
-                "TOTAL [" + sigmetDataList.size() + "], " +
-                "SUCCESS [" + successCount + "], " +
-                "FAILURE [" + failureCount + "]"
-            );
-
-        } catch (Exception e) {
-        	
-            e.printStackTrace();
-
-            this.dbManager.rollback();
-
-            throw new RuntimeException("EvaluateAviationMessage.evaluateSigmet failed.", e);
-        }
-    }
 
     /**
      * AMIS AIRMET 자료 조회
@@ -415,6 +445,32 @@ public class EvaluateAviationMessage {
 
         return result;
     }
+    
+
+	/**
+	 * 평가 결과 로그 출력
+	 */
+	private void printEvaluationResultLog(String messageType, Date startDate, Date endDate,
+	        int totalCount, int successCount, int failureCount, long elapsedMillis) {
+	
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	
+	    double successRate = totalCount > 0
+	            ? successCount * 100.0 / totalCount : 0.0;
+	
+	    System.out.println("============================================================");
+	    System.out.println(" " + messageType + " Evaluation Result");
+	    System.out.println("------------------------------------------------------------");
+	    System.out.println(" Period       : " + sdf.format(startDate) + " ~ " + sdf.format(endDate));
+	    System.out.println(" Total        : " + totalCount);
+	    System.out.println(" SUCCESS      : " + successCount);
+	    System.out.println(" FAILURE      : " + failureCount);
+	    System.out.println(" Success Rate : " + String.format("%.2f", successRate) + "%");
+	    System.out.println("------------------------------------------------------------");
+	    System.out.println(" Elapsed Time : " + elapsedMillis + " ms");
+	    System.out.println("============================================================");
+	}
+
 
     /**
      * Main
@@ -431,9 +487,12 @@ public class EvaluateAviationMessage {
                 return;
             }
             
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-            Date startDate = sdf.parse("202607010000");
-            Date endDate   = sdf.parse("202608010000");
+            Calendar cal = new GregorianCalendar();
+            Date endDate = cal.getTime();
+            
+            cal.add(Calendar.DAY_OF_MONTH, -1);
+            
+            Date startDate = cal.getTime();
             
             program.process(startDate, endDate);
 

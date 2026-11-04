@@ -54,8 +54,8 @@ public class EvaluateWintem {
 
 	private DatabaseManager dbManager;
 
-	private final String DATA_STORE_PATH = "F:/data/datastore";
-	//private final String DATA_STORE_PATH = "/data/DATA_STORE";
+	//private final String DATA_STORE_PATH = "F:/data/datastore";
+	private final String DATA_STORE_PATH = "/data/DATA_STORE";
 	//private final String DATA_STORE_PATH = "//172.26.56.124/data_store";
 
 	private final String GDPS_NE57_ANAL_PATH = DATA_STORE_PATH + "/GDPS_NE57_ANAL";
@@ -1143,8 +1143,7 @@ public class EvaluateWintem {
 	/** 로그 출력 시각은 실행 환경의 시간대이며, 자료의 발표·예측시각은 UTC이다. */
 	private void logEval(String level, String format, Object... args) {
 
-		String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.ROOT)
-				.format(new Date());
+		String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.ROOT).format(new Date());
 		String message = String.format(Locale.ROOT, format, args);
 		java.io.PrintStream stream = "ERROR".equals(level) ? System.err : System.out;
 		stream.printf(Locale.ROOT, "%s [%-5s] [WINTEM-EVAL] %s%n", timestamp, level, message);
